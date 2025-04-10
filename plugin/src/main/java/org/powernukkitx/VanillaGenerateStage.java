@@ -26,6 +26,5 @@ public class VanillaGenerateStage extends GenerateStage {
             }
         }
         chunk.setChunkState(ChunkState.POPULATED);
-        chunk.populateSkyLight();
     }
 };

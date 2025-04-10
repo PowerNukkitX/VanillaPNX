@@ -56,6 +56,7 @@ public class VanillaGenerator extends Generator {
                 if(state == null) state = BlockUnknown.PROPERTIES.getDefaultState();
                 chunk.setBlockState(x, y, z, state);
             }
+            chunk.populateSkyLight();
             chunk.setChunkState(ChunkState.FINISHED);
             for(Player player : chunk.getLevel().getPlayers().values()) {
                 chunk.getLevel().requestChunk(chunk.getX(), chunk.getZ(), player);

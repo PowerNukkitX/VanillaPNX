@@ -49,29 +49,38 @@ public class PaperWrapper {
         }
         process.onExit().thenRun(this::onExit);
 
-        new Thread(() -> {
-            console:
-            while (process.isAlive() && process.getInputStream() != null) {
-                BufferedReader out = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                String line = "";
-
-                try {
-                    while ((line = out.readLine()) != null) {
-                        if(line.contains("PNXSocketPortInfo=")) {
-                            Pattern pattern = Pattern.compile("PNXSocketPortInfo=([0-9]*);");
-                            Matcher matcher = pattern.matcher(line);
-                            if(matcher.find()) {
-                                this.socket = new PaperSocket(Integer.parseInt(matcher.group(1)));
-                                this.socket.send("ClientHello");
-                                break console;
-                            }
-                         }
+        Thread outThread = new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if(line.contains("PNXSocketPortInfo=")) {
+                        Pattern pattern = Pattern.compile("PNXSocketPortInfo=([0-9]*);");
+                        Matcher matcher = pattern.matcher(line);
+                        if(matcher.find()) {
+                            this.socket = new PaperSocket(Integer.parseInt(matcher.group(1)));
+                            this.socket.send("ClientHello");
+                        }
                     }
-                } catch (IOException e) {
-                    //e.printStackTrace();
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }).start();
+        });
+        outThread.start();
+
+// Lies stderr
+        Thread errThread = new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.err.println("ERR: " + line);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        errThread.start();
+
     }
 
     public void stop() {
