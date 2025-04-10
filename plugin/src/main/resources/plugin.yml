@@ -1,0 +1,7 @@
+name: VanillaPNX
+version: "1.0"
+api: ["2.0.0"]
+main: org.powernukkitx.VanillaPNX
+author: "Buddelbubi"
+description: "Generate vanilla worlds in PNX"
+load: STARTUP
