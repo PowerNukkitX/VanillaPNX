@@ -1,6 +1,8 @@
 package org.powernukkitx.utils;
 
 import com.google.gson.JsonArray;
+import it.unimi.dsi.fastutil.longs.LongArraySet;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +25,8 @@ public class WorldInfo {
     private final PNXServer server;
     private World world;
 
-    private final ObjectArraySet<Long> chunkLoadingQueue = new ObjectArraySet<>();
-    private final ObjectArraySet<Long> chunkQueue = new ObjectArraySet<>();
+    private final LongOpenHashSet chunkLoadingQueue = new LongOpenHashSet();
+    private final LongOpenHashSet chunkQueue = new LongOpenHashSet();
 
     private static final ObjectArraySet<Thread> chunkPacketThreads = new ObjectArraySet<>();
 
@@ -34,18 +36,20 @@ public class WorldInfo {
 
     public void tick() {
         chunkPacketThreads.removeIf(thread -> !thread.isAlive());
-        if (chunkPacketThreads.size() < 32) {
-            Thread thread = new Thread(() -> {
-                long startTime = System.currentTimeMillis();
-                ObjectArraySet<Long> chunkQueueClone = chunkQueue.clone();
-                chunkQueue.clear();
-                for(Long chunkHash : chunkQueueClone) {
-                    sentChunkFinished(chunkHash);
-                }
-                Bukkit.getLogger().info("Sending " + chunkQueueClone.size() + " Chunks took " + (System.currentTimeMillis() - startTime) + " ms");
-            });
-            thread.start();
-            chunkPacketThreads.add(thread);
+        if(!chunkQueue.isEmpty()) {
+            if (chunkPacketThreads.size() < 32) {
+                Thread thread = new Thread(() -> {
+                    long startTime = System.currentTimeMillis();
+                    LongOpenHashSet chunkQueueClone = chunkQueue.clone();
+                    chunkQueue.clear();
+                    for(Long chunkHash : chunkQueueClone) {
+                        sentChunkFinished(chunkHash);
+                    }
+                    Bukkit.getLogger().info("Sending " + chunkQueueClone.size() + " Chunks took " + (System.currentTimeMillis() - startTime) + " ms");
+                });
+                thread.start();
+                chunkPacketThreads.add(thread);
+            }
         }
     }
 

@@ -54,13 +54,8 @@ public class PaperSocket {
                         Server.getInstance().getScheduler().scheduleRepeatingTask(() -> {
                             send("ClientHeartbeat");
                         }, 20);
-                        try {
-                            TimeUnit.MILLISECONDS.sleep(100);
-                            this.serverHello = true;
-                            VanillaGenerator.getQueue().init();
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
+                        this.serverHello = true;
+                        VanillaGenerator.getQueue().init();
                     }
                     case "LevelAcknowledged" -> {
                         GenerationQueue.acknowledged(object.get(1).getAsString());

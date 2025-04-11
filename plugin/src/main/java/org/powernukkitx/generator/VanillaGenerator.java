@@ -44,6 +44,7 @@ public class VanillaGenerator extends Generator {
 
     public static void applyData(IChunk chunk, JsonArray data) {
         new Thread(() -> {
+            if(chunk.getChunkState() == ChunkState.FINISHED) return;
             chunk.setChunkState(ChunkState.FINISHED);
             for(JsonElement element : data) {
                 JsonArray blockData = element.getAsJsonArray();
