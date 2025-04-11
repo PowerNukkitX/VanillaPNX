@@ -6,7 +6,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.powernukkitx.VanillaGenerator;
+import org.powernukkitx.generator.GenerationQueue;
+import org.powernukkitx.generator.VanillaGenerator;
 import org.powernukkitx.VanillaPNX;
 import org.powernukkitx.listener.ChunkLoadListener;
 import org.powernukkitx.listener.LevelLoadListener;
@@ -56,14 +57,18 @@ public class PaperSocket {
                         try {
                             TimeUnit.MILLISECONDS.sleep(100);
                             this.serverHello = true;
+                            VanillaGenerator.getQueue().init();
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
                         }
                     }
+                    case "LevelAcknowledged" -> {
+                        GenerationQueue.acknowledged(object.get(1).getAsString());
+                    }
                     case "ChunkCompletion" -> {
                         String levelname = object.get(1).getAsString();
                         Long chunkHash = object.get(2).getAsLong();
-                        ChunkLoadListener.addToReceived(levelname, chunkHash);
+                        GenerationQueue.addToReceived(levelname, chunkHash);
                         VanillaGenerator.applyData(VanillaPNX.get().getServer().getLevelByName(levelname).getChunk(Level.getHashX(chunkHash), Level.getHashZ(chunkHash)), object.get(3).getAsJsonArray());
                     }
                 }
@@ -74,12 +79,16 @@ public class PaperSocket {
     public void send(String... values) {
         JsonArray message = new JsonArray();
         for(String value : values) message.add(value);
-        message.add(VanillaPNX.get().getServer().getPort());
+        send(message);
+    }
+
+    public void send(JsonArray array) {
+        array.add(VanillaPNX.get().getServer().getPort());
         try {
             Socket socket = new Socket("127.0.0.1", getPaperPort());
             OutputStream output = socket.getOutputStream();
             PrintWriter writer = new PrintWriter(output, true);
-            writer.println(message);
+            writer.println(array);
             socket.close();
         }
         catch (Exception ex) {

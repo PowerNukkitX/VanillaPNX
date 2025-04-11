@@ -1,5 +1,6 @@
 package org.powernukkitx.socket;
 
+import com.google.gson.JsonArray;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
 import lombok.Getter;
@@ -21,6 +22,10 @@ public class PNXServer {
         Bukkit.getLogger().info("Registered new World: " + info.getName());
         worlds.put(info.getName(), info);
         if(ServerLoadListener.isLoaded()) info.getWorld();
+        JsonArray array = new JsonArray();
+        array.add("LevelAcknowledged");
+        array.add(info.getName());
+        PNXSocket.send(info.getServer(), array);
     }
 
 }

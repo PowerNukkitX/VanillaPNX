@@ -1,6 +1,5 @@
-package org.powernukkitx;
+package org.powernukkitx.generator;
 
-import cn.nukkit.block.BlockBarrier;
 import cn.nukkit.block.BlockInvisibleBedrock;
 import cn.nukkit.level.format.ChunkState;
 import cn.nukkit.level.format.IChunk;

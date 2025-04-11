@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.powernukkitx.PaperBridge;
 import org.powernukkitx.socket.PNXServer;
 import org.powernukkitx.socket.PNXSocket;
 
@@ -25,22 +26,26 @@ public class WorldInfo {
     private final ObjectArraySet<Long> chunkLoadingQueue = new ObjectArraySet<>();
     private final ObjectArraySet<Long> chunkQueue = new ObjectArraySet<>();
 
+    private static final ObjectArraySet<Thread> chunkPacketThreads = new ObjectArraySet<>();
+
     public void queueChunk(long chunkHash) {
-        if(dimension != 0) Bukkit.getLogger().info("Received request for " + name + " Dim" + dimension);
         chunkQueue.add(chunkHash);
     }
 
     public void tick() {
-        for(Long chunkHash : chunkQueue.clone()) {
-            int x = ChunkHash.getHashX(chunkHash);
-            int z = ChunkHash.getHashZ(chunkHash);
-            if(!chunkLoadingQueue.contains(chunkHash)) {
-                getWorld().loadChunk(x, z, true);
-            }
-            if(getWorld().isChunkGenerated(x, z)) {
-                sentChunkFinished(chunkHash);
-            }
-
+        chunkPacketThreads.removeIf(thread -> !thread.isAlive());
+        if (chunkPacketThreads.size() < 32) {
+            Thread thread = new Thread(() -> {
+                long startTime = System.currentTimeMillis();
+                ObjectArraySet<Long> chunkQueueClone = chunkQueue.clone();
+                chunkQueue.clear();
+                for(Long chunkHash : chunkQueueClone) {
+                    sentChunkFinished(chunkHash);
+                }
+                Bukkit.getLogger().info("Sending " + chunkQueueClone.size() + " Chunks took " + (System.currentTimeMillis() - startTime) + " ms");
+            });
+            thread.start();
+            chunkPacketThreads.add(thread);
         }
     }
 
@@ -48,33 +53,33 @@ public class WorldInfo {
         int x = ChunkHash.getHashX(hash);
         int z = ChunkHash.getHashZ(hash);
 
-        Chunk chunk = getWorld().getChunkAt(x, z);
-
+        Chunk rChunk = getWorld().getChunkAt(x, z);
+        ChunkSnapshot chunk = rChunk.getWorld().getChunkAt(x, z).getChunkSnapshot(false, true, false);
         JsonArray data = new JsonArray();
+        int minHeight = getMinHeight(dimension);
+        int maxHeight = getMaxHeight(dimension);
         for(int _x = 0; _x < 16; _x++) {
             for(int _z = 0; _z < 16; _z++) {
-                for(int _y = getMinHeight(dimension); _y <= getMaxHeight(dimension); _y++) {
-                    Block block = chunk.getBlock(_x, _y, _z);
-                    String state = block.getState().getBlockData().getAsString();
+                for(int _y = minHeight; _y <= maxHeight; _y++) {
+                    String state = chunk.getBlockData(_x, _y, _z).getAsString();
                     JsonArray blockData = new JsonArray();
                     blockData.add(_x);
                     blockData.add(_y);
                     blockData.add(_z);
                     blockData.add(state);
-                    blockData.add(block.getBiome().getKey().getKey());
+                    blockData.add(chunk.getBiome(_x, _y, _z).getKey().getKey());
                     data.add(blockData);
                 }
             }
         }
-        chunk.unload(false);
 
         JsonArray array = new JsonArray();
         array.add("ChunkCompletion");
         array.add(getName());
         array.add(hash);
         array.add(data);
-        chunkQueue.remove(hash);
         PNXSocket.send(server, array);
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(PaperBridge.get(), () -> rChunk.unload(false));
     }
 
     public World getWorld() {
@@ -85,6 +90,7 @@ public class WorldInfo {
             worldCreator.type(WorldType.NORMAL);
             worldCreator.seed(getSeed());
             world = worldCreator.createWorld();
+            world.setAutoSave(false);
         }
         return world;
     }

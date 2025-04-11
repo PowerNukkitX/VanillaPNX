@@ -3,3 +3,4 @@ version: '1.0-SNAPSHOT'
 main: org.powernukkitx.PaperBridge
 api-version: '1.21'
 folia-supported: false
+load: STARTUP

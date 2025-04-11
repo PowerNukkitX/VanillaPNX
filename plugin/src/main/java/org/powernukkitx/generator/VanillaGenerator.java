@@ -1,30 +1,31 @@
-package org.powernukkitx;
+package org.powernukkitx.generator;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.block.*;
 import cn.nukkit.level.DimensionData;
-import cn.nukkit.level.Level;
 import cn.nukkit.level.format.ChunkState;
 import cn.nukkit.level.format.IChunk;
 import cn.nukkit.level.generator.GenerateStage;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.terra.mappings.JeBlockState;
 import cn.nukkit.level.generator.terra.mappings.MappingRegistries;
-import cn.nukkit.registry.BiomeRegistry;
 import cn.nukkit.registry.Registries;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import lombok.Getter;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class VanillaGenerator extends Generator {
 
+    @Getter
+    private final static GenerationQueue queue = new GenerationQueue();
+
     private final static Map<String, Integer> BIOMES = MappingRegistries.BIOME.get().entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
 
     public static final String NAME = "vanilla";
+
 
     public VanillaGenerator(DimensionData dimensionData, Map<String, Object> options) {
         super(dimensionData, options);
@@ -43,6 +44,7 @@ public class VanillaGenerator extends Generator {
 
     public static void applyData(IChunk chunk, JsonArray data) {
         new Thread(() -> {
+            chunk.setChunkState(ChunkState.FINISHED);
             for(JsonElement element : data) {
                 JsonArray blockData = element.getAsJsonArray();
                 int x = blockData.get(0).getAsInt();
@@ -59,7 +61,6 @@ public class VanillaGenerator extends Generator {
                 chunk.setBlockState(x, y, z, state);
             }
             chunk.populateSkyLight();
-            chunk.setChunkState(ChunkState.FINISHED);
             for(Player player : chunk.getLevel().getPlayers().values()) {
                 chunk.getLevel().requestChunk(chunk.getX(), chunk.getZ(), player);
             }

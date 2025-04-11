@@ -1,13 +1,12 @@
 package org.powernukkitx.listener;
 
-import cn.nukkit.Server;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.level.LevelLoadEvent;
 import cn.nukkit.level.Level;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import lombok.Getter;
-import org.powernukkitx.VanillaGenerator;
+import org.powernukkitx.generator.VanillaGenerator;
 import org.powernukkitx.VanillaPNX;
 import org.powernukkitx.server.socket.PaperSocket;
 

@@ -4,6 +4,8 @@ import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.registry.RegisterException;
 import cn.nukkit.registry.Registries;
+import org.powernukkitx.generator.VanillaGenerateStage;
+import org.powernukkitx.generator.VanillaGenerator;
 import org.powernukkitx.listener.ChunkLoadListener;
 import org.powernukkitx.listener.LevelLoadListener;
 import org.powernukkitx.listener.PlayerLoginListener;

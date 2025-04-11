@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.powernukkitx.listener.ChunkUnloadListener;
 import org.powernukkitx.listener.ServerLoadListener;
 import org.powernukkitx.socket.PNXServer;
 import org.powernukkitx.socket.PNXSocket;
@@ -25,6 +26,7 @@ public final class PaperBridge extends JavaPlugin {
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(new ServerLoadListener(), this);
+        getServer().getPluginManager().registerEvents(new ChunkUnloadListener(), this);
         new BukkitRunnable() {
             @Override
             public void run() {

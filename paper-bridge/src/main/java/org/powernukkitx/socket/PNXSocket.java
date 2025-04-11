@@ -1,6 +1,7 @@
 package org.powernukkitx.socket;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import lombok.Getter;
@@ -69,10 +70,12 @@ public class PNXSocket {
                                 Integer.parseInt(object.get(3).getAsString()),
                                 server));
                     }
-                    case "RequestChunk" -> {
+                    case "RequestChunks" -> {
                         PNXServer server = servers.get(port);
                         String world = object.get(1).getAsString();
-                        server.getWorlds().get(world).queueChunk(Long.parseLong(object.get(2).getAsString()));
+                        for(JsonElement element : object.get(2).getAsJsonArray()) {
+                            server.getWorlds().get(world).queueChunk(element.getAsLong());
+                        }
                     }
                 }
             }).start();
