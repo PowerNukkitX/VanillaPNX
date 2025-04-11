@@ -1,9 +1,11 @@
 package org.powernukkitx.generator;
 
+import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.ChunkState;
 import cn.nukkit.level.format.IChunk;
+import cn.nukkit.math.ChunkVector2;
 import com.google.gson.JsonArray;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -46,7 +48,17 @@ public class GenerationQueue {
                 long hash = Level.chunkHash(chunk.getX(), chunk.getZ());
                 if (!receivedChunks.contains(hash)) {
                     if (!requestedChunks.containsKey(hash)) {
-                        chunks.add(hash);
+                        JsonArray array = new JsonArray();
+                        array.add(hash);
+                        long minDistance = Long.MAX_VALUE;
+                        ChunkVector2 looking = new ChunkVector2(chunk.getX(), chunk.getZ());
+                        for(Player player : level.getPlayers().values()) {
+                            ChunkVector2 playerChunk = new ChunkVector2(player.getChunkX(), player.getChunkZ());
+                            long distance = (long) looking.distance(playerChunk);
+                            if(distance < minDistance) minDistance = distance;
+                        }
+                        array.add(minDistance);
+                        chunks.add(array);
                         requestedChunks.put(hash, System.currentTimeMillis());
                     } else if(System.currentTimeMillis() - requestedChunks.get(hash) > 10000) {
                         requestedChunks.remove(hash);

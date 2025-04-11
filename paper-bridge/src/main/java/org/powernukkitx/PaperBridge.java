@@ -40,7 +40,7 @@ public final class PaperBridge extends JavaPlugin {
                     }
                 }
             }
-        }.runTaskTimer(this, 20, 1);
+        }.runTaskTimer(this, 0, 5);
     }
 
     @Override

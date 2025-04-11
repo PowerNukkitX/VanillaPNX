@@ -43,11 +43,12 @@ public class VanillaGenerator extends Generator {
         return NAME;
     }
 
-    public static void applyData(IChunk chunk, JsonArray data) {
+    public static void applyData(IChunk chunk, JsonArray terrain) {
         new Thread(() -> {
+
             if(chunk.getChunkState() == ChunkState.FINISHED) return;
             chunk.setChunkState(ChunkState.FINISHED);
-            for(JsonElement element : data) {
+            for(JsonElement element : terrain) {
                 JsonArray blockData = element.getAsJsonArray();
                 int x = blockData.get(0).getAsInt();
                 int y = blockData.get(1).getAsInt();

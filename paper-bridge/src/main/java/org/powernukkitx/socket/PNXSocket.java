@@ -74,7 +74,8 @@ public class PNXSocket {
                         PNXServer server = servers.get(port);
                         String world = object.get(1).getAsString();
                         for(JsonElement element : object.get(2).getAsJsonArray()) {
-                            server.getWorlds().get(world).queueChunk(element.getAsLong());
+                            JsonArray chunkInfo = element.getAsJsonArray();
+                            server.getWorlds().get(world).queueChunk(chunkInfo.get(0).getAsLong(), chunkInfo.get(1).getAsLong());
                         }
                     }
                 }
