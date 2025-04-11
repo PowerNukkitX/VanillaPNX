@@ -1,16 +1,19 @@
 package org.powernukkitx.listener;
 
+import cn.nukkit.Server;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.level.LevelLoadEvent;
 import cn.nukkit.level.Level;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
+import lombok.Getter;
 import org.powernukkitx.VanillaGenerator;
 import org.powernukkitx.VanillaPNX;
 import org.powernukkitx.server.socket.PaperSocket;
 
 public class LevelLoadListener implements Listener {
 
+    @Getter
     private static final ObjectArraySet<String> sentLevels = new ObjectArraySet<>();
 
     @EventHandler
@@ -18,7 +21,7 @@ public class LevelLoadListener implements Listener {
         PaperSocket socket = VanillaPNX.get().getWrapper().getSocket();
         if(socket != null) {
             Level level = event.getLevel();
-            if(sentLevels.contains(level.getName())) {
+            if(!sentLevels.contains(level.getName())) {
                 sendLevelInfo(level);
             }
         }

@@ -24,36 +24,31 @@ public class ChunkLoadListener implements Listener {
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent event) {
         IChunk chunk = event.getChunk();
-        if (event.isNewChunk()) {
-            while (VanillaPNX.get().getWrapper().getSocket() == null) {
+        Level level = event.getLevel();
+        if(VanillaGenerator.class.isAssignableFrom(level.getGenerator().getClass())) {
+            while (VanillaPNX.get().getWrapper().getSocket() == null || !VanillaPNX.get().getWrapper().getSocket().isServerHello()) {
                 TimeUnit.MILLISECONDS.sleep(10);
             }
-            Level level = event.getLevel();
-            if (!requestedLevelChunks.containsKey(level.getName())) {
-                requestedLevelChunks.put(level.getName(), new ObjectArraySet<>());
-            }
-            if (!receivedLevelChunks.containsKey(level.getName())) {
-                receivedLevelChunks.put(level.getName(), new ObjectArraySet<>());
-            }
-            ObjectArraySet<Long> receivedChunks = receivedLevelChunks.get(level.getName());
-            ObjectArraySet<Long> requestedChunks = requestedLevelChunks.get(level.getName());
+            if (event.isNewChunk()) {
 
-            Long hash = Level.chunkHash(chunk.getX(), chunk.getZ());
-            if (!receivedChunks.contains(hash)) {
-                if (!requestedChunks.contains(hash)) {
-                    VanillaPNX.get().getWrapper().getSocket().send("RequestChunk", level.getName(), String.valueOf(hash));
-                    requestedChunks.add(hash);
+                if (!requestedLevelChunks.containsKey(level.getName())) {
+                    requestedLevelChunks.put(level.getName(), new ObjectArraySet<>());
                 }
-            } else receivedChunks.remove(hash);
-        }
-    }
+                if (!receivedLevelChunks.containsKey(level.getName())) {
+                    receivedLevelChunks.put(level.getName(), new ObjectArraySet<>());
+                }
+                ObjectArraySet<Long> receivedChunks = receivedLevelChunks.get(level.getName());
+                ObjectArraySet<Long> requestedChunks = requestedLevelChunks.get(level.getName());
 
-
-    public static void addToRequested(String level, Long chunkHash) {
-        if (!receivedLevelChunks.containsKey(level)) {
-            receivedLevelChunks.put(level, new ObjectArraySet<>());
+                Long hash = Level.chunkHash(chunk.getX(), chunk.getZ());
+                if (!receivedChunks.contains(hash)) {
+                    if (!requestedChunks.contains(hash)) {
+                        VanillaPNX.get().getWrapper().getSocket().send("RequestChunk", level.getName(), String.valueOf(hash));
+                        requestedChunks.add(hash);
+                    }
+                } else receivedChunks.remove(hash);
+            }
         }
-        receivedLevelChunks.get(level).add(chunkHash);
     }
 
     public static void addToReceived(String level, Long chunkHash) {

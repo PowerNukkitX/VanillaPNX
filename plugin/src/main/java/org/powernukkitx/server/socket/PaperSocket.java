@@ -1,11 +1,10 @@
 package org.powernukkitx.server.socket;
 
+import cn.nukkit.Server;
 import cn.nukkit.level.Level;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.SneakyThrows;
 import org.powernukkitx.VanillaGenerator;
 import org.powernukkitx.VanillaPNX;
@@ -18,6 +17,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
 public class PaperSocket {
 
@@ -27,6 +27,9 @@ public class PaperSocket {
     protected ServerSocket socket;
     protected Thread socketThread;
 
+    @Getter
+    private boolean serverHello = false;
+
     @SneakyThrows
     public PaperSocket(int paperPort) {
         this.paperPort = paperPort;
@@ -34,7 +37,6 @@ public class PaperSocket {
         this.socketThread = new Thread(() -> {
             loop();
         });
-        VanillaPNX.get().getLogger().info("Connection to paper established at " + paperPort);
         this.socketThread.start();
     }
 
@@ -48,6 +50,15 @@ public class PaperSocket {
                 switch (object.get(0).getAsString()) {
                     case "ServerHello" -> {
                         VanillaPNX.get().getServer().getLevels().values().forEach(LevelLoadListener::sendLevelInfo);
+                        Server.getInstance().getScheduler().scheduleRepeatingTask(() -> {
+                            send("ClientHeartbeat");
+                        }, 20);
+                        try {
+                            TimeUnit.MILLISECONDS.sleep(100);
+                            this.serverHello = true;
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                     case "ChunkCompletion" -> {
                         String levelname = object.get(1).getAsString();

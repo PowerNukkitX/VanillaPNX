@@ -1,6 +1,7 @@
 package org.powernukkitx;
 
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.powernukkitx.listener.ServerLoadListener;
@@ -27,6 +28,10 @@ public final class PaperBridge extends JavaPlugin {
         new BukkitRunnable() {
             @Override
             public void run() {
+                if(System.currentTimeMillis() - PNXSocket.getHeartbeatTime() > 60000) {
+                    Bukkit.getLogger().warning("Did not receive an heartbeat from PowerNukkitX in the last minute... Shutting down!");
+                    Bukkit.getServer().shutdown();
+                }
                 for(PNXServer server : socket.getServers().values()) {
                     for(WorldInfo info : server.getWorlds().values()) {
                         info.tick();

@@ -1,15 +1,12 @@
 package org.powernukkitx.utils;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.powernukkitx.PaperBridge;
 import org.powernukkitx.socket.PNXServer;
 import org.powernukkitx.socket.PNXSocket;
 
@@ -29,6 +26,7 @@ public class WorldInfo {
     private final ObjectArraySet<Long> chunkQueue = new ObjectArraySet<>();
 
     public void queueChunk(long chunkHash) {
+        if(dimension != 0) Bukkit.getLogger().info("Received request for " + name + " Dim" + dimension);
         chunkQueue.add(chunkHash);
     }
 
@@ -55,7 +53,7 @@ public class WorldInfo {
         JsonArray data = new JsonArray();
         for(int _x = 0; _x < 16; _x++) {
             for(int _z = 0; _z < 16; _z++) {
-                for(int _y = getWorld().getMinHeight(); _y < getWorld().getMaxHeight(); _y++) {
+                for(int _y = getMinHeight(dimension); _y <= getMaxHeight(dimension); _y++) {
                     Block block = chunk.getBlock(_x, _y, _z);
                     String state = block.getState().getBlockData().getAsString();
                     JsonArray blockData = new JsonArray();
@@ -68,6 +66,7 @@ public class WorldInfo {
                 }
             }
         }
+        chunk.unload(false);
 
         JsonArray array = new JsonArray();
         array.add("ChunkCompletion");
@@ -95,6 +94,21 @@ public class WorldInfo {
             case 1 -> World.Environment.NETHER;
             case 2 -> World.Environment.THE_END;
             default -> World.Environment.NORMAL;
+        };
+    }
+
+    public int getMinHeight(int dimension) {
+        return switch (dimension) {
+            case 0 -> -64;
+            default -> 0;
+        };
+    }
+
+    public int getMaxHeight(int dimension) {
+        return switch (dimension) {
+            case 0 -> 319;
+            case 1 -> 127;
+            default -> 255;
         };
     }
 

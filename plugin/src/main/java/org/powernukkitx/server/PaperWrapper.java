@@ -68,7 +68,6 @@ public class PaperWrapper {
         });
         outThread.start();
 
-// Lies stderr
         Thread errThread = new Thread(() -> {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
                 String line;
@@ -80,7 +79,6 @@ public class PaperWrapper {
             }
         });
         errThread.start();
-
     }
 
     public void stop() {

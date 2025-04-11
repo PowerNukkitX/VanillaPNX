@@ -16,6 +16,9 @@ import java.net.Socket;
 public class PNXSocket {
 
     @Getter
+    private static Long heartbeatTime = System.currentTimeMillis();
+
+    @Getter
     protected final Int2ObjectArrayMap<PNXServer> servers = new Int2ObjectArrayMap<>();
 
     protected ServerSocket socket;
@@ -43,7 +46,6 @@ public class PNXSocket {
             BufferedReader in = new BufferedReader(new InputStreamReader(inputSocket.getInputStream()));
             JsonArray object = JsonParser.parseString(in.readLine()).getAsJsonArray();
             new Thread(() ->{
-                PaperBridge.get().getLogger().info("Received=" + object);
                 int port = object.get(object.size()-1).getAsInt();
                 switch (object.get(0).getAsString()) {
                     case "ClientHello" -> {
@@ -56,6 +58,9 @@ public class PNXSocket {
                     case "ClientBye" -> {
                         servers.remove(port);
                     }
+                    case "ClientHeartbeat" -> {
+                        heartbeatTime = System.currentTimeMillis();
+                    }
                     case "WorldInfo" -> {
                         PNXServer server = servers.get(port);
                         server.addWorldInfo(new WorldInfo(
@@ -66,7 +71,8 @@ public class PNXSocket {
                     }
                     case "RequestChunk" -> {
                         PNXServer server = servers.get(port);
-                        server.getWorlds().get(object.get(1).getAsString()).queueChunk(Long.parseLong(object.get(2).getAsString()));
+                        String world = object.get(1).getAsString();
+                        server.getWorlds().get(world).queueChunk(Long.parseLong(object.get(2).getAsString()));
                     }
                 }
             }).start();

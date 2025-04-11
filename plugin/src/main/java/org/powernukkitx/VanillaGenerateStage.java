@@ -20,8 +20,8 @@ public class VanillaGenerateStage extends GenerateStage {
         IChunk chunk = chunkGenerateContext.getChunk();
         for(int x = 0; x < 16; x++) {
             for(int z = 0; z < 16; z++) {
-                for(int y = chunkGenerateContext.getLevel().getMinHeight(); y <= chunkGenerateContext.getLevel().getMinHeight(); y++) {
-                    chunk.setBlockState(x, y, z, BlockBarrier.PROPERTIES.getDefaultState());
+                for(int y = chunkGenerateContext.getLevel().getMinHeight(); y <= chunkGenerateContext.getLevel().getMaxHeight(); y++) {
+                    chunk.setBlockState(x, y, z, BlockInvisibleBedrock.PROPERTIES.getDefaultState());
                 }
             }
         }

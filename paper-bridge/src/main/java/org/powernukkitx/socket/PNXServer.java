@@ -3,6 +3,7 @@ package org.powernukkitx.socket;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.powernukkitx.listener.ServerLoadListener;
 import org.powernukkitx.utils.WorldInfo;
 
@@ -17,6 +18,7 @@ public class PNXServer {
     }
 
     public void addWorldInfo(WorldInfo info) {
+        Bukkit.getLogger().info("Registered new World: " + info.getName());
         worlds.put(info.getName(), info);
         if(ServerLoadListener.isLoaded()) info.getWorld();
     }
