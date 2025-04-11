@@ -1,6 +1,7 @@
 package org.powernukkitx.generator;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.block.*;
 import cn.nukkit.level.DimensionData;
 import cn.nukkit.level.format.ChunkState;
@@ -61,7 +62,10 @@ public class VanillaGenerator extends Generator {
                 if(state == null) state = BlockUnknown.PROPERTIES.getDefaultState();
                 chunk.setBlockState(x, y, z, state);
             }
-            chunk.populateSkyLight();
+            if (Server.getInstance().getSettings().chunkSettings().lightUpdates()) {
+                chunk.populateSkyLight();
+                chunk.setLightPopulated();
+            }
             for(Player player : chunk.getLevel().getPlayers().values()) {
                 chunk.getLevel().requestChunk(chunk.getX(), chunk.getZ(), player);
             }
