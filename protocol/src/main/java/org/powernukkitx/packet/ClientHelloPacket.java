@@ -6,7 +6,7 @@ import org.powernukkitx.netty.HandleByteBuf;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClientHello extends Packet {
+public class ClientHelloPacket extends Packet {
 
     public int port;
 

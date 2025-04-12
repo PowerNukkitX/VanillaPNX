@@ -10,13 +10,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.bukkit.*;
 import org.powernukkitx.PaperBridge;
-import org.powernukkitx.packet.ChunkCompletion;
+import org.powernukkitx.packet.ChunkTerrainDataPacket;
 import org.powernukkitx.packet.objects.BlockData;
 import org.powernukkitx.packet.objects.BlockVector;
 import org.powernukkitx.packet.objects.ChunkData;
 import org.powernukkitx.socket.PNXServer;
 
 import java.util.Comparator;
+import java.util.HashMap;
 
 @Getter
 @ToString
@@ -30,16 +31,20 @@ public class WorldInfo {
     private final PNXServer server;
     private World world;
 
+    //This prevents read/write race
+    private final Long2LongOpenHashMap chunkQueueQueue = new Long2LongOpenHashMap();
     @Getter
-    private final Long2LongOpenHashMap chunkQueue = new Long2LongOpenHashMap();
+    private final HashMap<Long, Long> chunkQueue = new HashMap<>(); //This one is accessed by too many threads.
 
     private static final ObjectArraySet<Thread> chunkPacketThreads = new ObjectArraySet<>();
 
     public void queueChunk(long chunkHash, long priority) {
-        chunkQueue.put(chunkHash, priority);
+        chunkQueueQueue.put(chunkHash, priority);
     }
 
     public void tick() {
+        chunkQueue.putAll(chunkQueueQueue);
+        chunkQueueQueue.clear();
         chunkPacketThreads.removeIf(thread -> !thread.isAlive());
         if(!chunkQueue.isEmpty()) {
             if (chunkPacketThreads.size() < 32) {
@@ -47,7 +52,7 @@ public class WorldInfo {
                     long startTime = System.currentTimeMillis();
                     LongOpenHashSet reserve = new LongOpenHashSet();
                     long minPriority = -1;
-                    for(var chunkHash : chunkQueue.long2LongEntrySet().stream().sorted(Comparator.comparingLong(Long2LongMap.Entry::getLongValue)).toArray()) {
+                    for(var chunkHash : new Long2LongOpenHashMap(chunkQueue).long2LongEntrySet().stream().sorted(Comparator.comparingLong(Long2LongMap.Entry::getLongValue)).toArray()) {
                         var entry = ((Long2LongMap.Entry) chunkHash);
                         if(minPriority == -1) minPriority = entry.getLongValue();
                         if(reserve.size() < (minPriority < 2 ? 4 : 2)) {
@@ -61,7 +66,7 @@ public class WorldInfo {
                     for(long hash : reserve) {
                         chunkData.add(getChunkData(hash));
                     }
-                    ChunkCompletion data = new ChunkCompletion();
+                    ChunkTerrainDataPacket data = new ChunkTerrainDataPacket();
                     data.levelName = getName();
                     data.chunks = chunkData.toArray(ChunkData[]::new);
                     PaperBridge.get().getSocket().send(data);

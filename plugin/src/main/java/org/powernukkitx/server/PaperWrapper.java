@@ -1,11 +1,11 @@
 package org.powernukkitx.server;
 
+import cn.nukkit.Server;
 import cn.nukkit.utils.Utils;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.powernukkitx.NettySocketServer;
 import org.powernukkitx.VanillaPNX;
-import org.powernukkitx.packet.ClientHello;
+import org.powernukkitx.packet.ClientHelloPacket;
 import org.powernukkitx.server.socket.PNXNettyImpl;
 
 import java.io.*;
@@ -58,7 +58,7 @@ public class PaperWrapper {
                         if(matcher.find()) {
                             int port = VanillaPNX.get().getServer().getPort();
                             this.socket = new PNXNettyImpl(port, Integer.parseInt(matcher.group(1)));
-                            this.socket.send(new ClientHello(port));
+                            this.socket.send(new ClientHelloPacket(port));
                         }
                     }
                 }
@@ -86,8 +86,9 @@ public class PaperWrapper {
     }
 
     protected void onExit() {
-        VanillaPNX.get().getLogger().info("Paper Server stopped!");
+        VanillaPNX.get().getLogger().info("Paper Server stopped.. Stopping PowerNukkitX...");
         process.destroy();
+        Server.getInstance().shutdown();
     }
 
     public void writeConsole(String command) {

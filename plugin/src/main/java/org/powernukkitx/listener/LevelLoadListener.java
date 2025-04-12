@@ -8,7 +8,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import lombok.Getter;
 import org.powernukkitx.VanillaPNX;
 import org.powernukkitx.generator.VanillaGenerator;
-import org.powernukkitx.packet.WorldInfo;
+import org.powernukkitx.packet.WorldInfoPacket;
 import org.powernukkitx.server.socket.PNXNettyImpl;;
 
 public class LevelLoadListener implements Listener {
@@ -31,7 +31,7 @@ public class LevelLoadListener implements Listener {
         if(VanillaGenerator.class.isAssignableFrom(level.getGenerator().getClass())) {
             if (!sentLevels.contains(level.getName())) {
                 PNXNettyImpl socket = VanillaPNX.get().getWrapper().getSocket();
-                WorldInfo info = new WorldInfo();
+                WorldInfoPacket info = new WorldInfoPacket();
                 info.name = level.getName();
                 info.seed = level.getSeed();
                 info.dimension = level.getDimension();

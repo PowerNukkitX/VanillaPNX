@@ -2,7 +2,7 @@ package org.powernukkitx.packet;
 
 import org.powernukkitx.netty.HandleByteBuf;
 
-public class WorldInfo extends Packet {
+public class WorldInfoPacket extends Packet {
 
     @Override
     public byte getPid() {

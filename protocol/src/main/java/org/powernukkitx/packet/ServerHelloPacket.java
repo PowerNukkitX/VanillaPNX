@@ -1,6 +1,6 @@
 package org.powernukkitx.packet;
 
-public class ServerHello extends Packet {
+public class ServerHelloPacket extends Packet {
 
     @Override
     public byte getPid() {

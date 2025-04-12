@@ -2,13 +2,14 @@ package org.powernukkitx.socket;
 
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.joml.Vector2L;
 import org.powernukkitx.NettySocketServer;
 import org.powernukkitx.packet.*;
 import org.powernukkitx.packet.objects.ChunkInfo;
 import org.powernukkitx.packet.objects.LevelPlayerPosition;
 import org.powernukkitx.utils.ChunkHash;
+
+import java.util.HashMap;
 
 
 public class PaperNettyImpl extends NettySocketServer {
@@ -25,21 +26,21 @@ public class PaperNettyImpl extends NettySocketServer {
 
     @Override
     protected void onPacket(Packet packet) {
-        if(packet instanceof ClientHello hello) {
+        if(packet instanceof ClientHelloPacket hello) {
             destinationPort = hello.port;
             server = new PNXServer(hello.port);
-            send(new ServerHello());
-        } else if(packet instanceof ClientHeartbeat) {
+            send(new ServerHelloPacket());
+        } else if(packet instanceof ClientHeartbeatPacket) {
             heartbeatTime = System.currentTimeMillis();
-        } else if(packet instanceof WorldInfo info) {
+        } else if(packet instanceof WorldInfoPacket info) {
             server.addWorldInfo(new org.powernukkitx.utils.WorldInfo(info.name, info.seed, info.dimension, server));
-        } else if(packet instanceof ChunkRequest request) {
+        } else if(packet instanceof ChunkRequestPacket request) {
             for(ChunkInfo element : request.chunks) {
                 server.getWorlds().get(request.levelName).queueChunk(element.chunkHash, element.priority);
             }
-        } else if(packet instanceof PlayerPositionUpdate update) {
+        } else if(packet instanceof PlayerPositionUpdatePacket update) {
             for(LevelPlayerPosition position : update.positions) {
-                Long2LongOpenHashMap chunks = server.getWorlds().get(position.levelName).getChunkQueue();
+                HashMap<Long, Long> chunks = server.getWorlds().get(position.levelName).getChunkQueue();
                 for(Long hash : chunks.keySet()) {
                     int x = ChunkHash.getHashX(hash);
                     int z = ChunkHash.getHashZ(hash);
@@ -53,10 +54,10 @@ public class PaperNettyImpl extends NettySocketServer {
                             minDistance = distance;
                         }
                     }
-                    chunks.put((long) hash, minDistance);
+                    chunks.put(hash, minDistance);
                 }
             }
-        } else if(packet instanceof ChunkThrowaway throwaway) {
+        } else if(packet instanceof ChunkThrowawayPacket throwaway) {
             server.getWorlds().get(throwaway.levelName).getChunkQueue().remove(throwaway.chunkHash);
         }
     }

@@ -7,11 +7,10 @@ import cn.nukkit.level.Level;
 import cn.nukkit.level.format.IChunk;
 
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import org.powernukkitx.VanillaPNX;
 import org.powernukkitx.generator.GenerationQueue;
 import org.powernukkitx.generator.VanillaGenerator;
-import org.powernukkitx.packet.ChunkThrowaway;
+import org.powernukkitx.packet.ChunkThrowawayPacket;
 
 public class ChunkUnloadListener implements Listener {
 
@@ -25,7 +24,7 @@ public class ChunkUnloadListener implements Listener {
                 Long2LongOpenHashMap chunks = GenerationQueue.getRequestedLevelChunks().get(level.getName());
                 if(chunks.containsKey(hash)) {
                     chunks.remove(hash);
-                    ChunkThrowaway throwaway = new ChunkThrowaway();
+                    ChunkThrowawayPacket throwaway = new ChunkThrowawayPacket();
                     throwaway.levelName = level.getName();
                     throwaway.chunkHash = hash;
                     VanillaPNX.get().getWrapper().getSocket().send(throwaway);

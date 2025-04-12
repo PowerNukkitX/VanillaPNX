@@ -2,7 +2,10 @@ package org.powernukkitx.server.socket;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.level.Level;
+import cn.nukkit.level.Position;
+import cn.nukkit.registry.Registries;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.powernukkitx.NettySocketServer;
@@ -12,6 +15,7 @@ import org.powernukkitx.generator.VanillaGenerator;
 import org.powernukkitx.listener.LevelLoadListener;
 import org.powernukkitx.packet.*;
 import org.powernukkitx.packet.objects.ChunkData;
+import org.powernukkitx.packet.objects.EntityData;
 import org.powernukkitx.packet.objects.LevelPlayerPosition;
 
 public class PNXNettyImpl extends NettySocketServer {
@@ -22,10 +26,10 @@ public class PNXNettyImpl extends NettySocketServer {
 
     @Override
     protected void onPacket(Packet packet) {
-        if(packet instanceof ServerHello) {
+        if(packet instanceof ServerHelloPacket) {
             VanillaPNX.get().getServer().getLevels().values().forEach(LevelLoadListener::sendLevelInfo);
             Server.getInstance().getScheduler().scheduleDelayedRepeatingTask(() -> {
-                send(new ClientHeartbeat());
+                send(new ClientHeartbeatPacket());
                 ObjectOpenHashSet<LevelPlayerPosition> positions = new ObjectOpenHashSet<>();
                 for(Level level : Server.getInstance().getLevels().values()) {
                     if(GenerationQueue.isAcknowledged(level.getName())) {
@@ -42,20 +46,22 @@ public class PNXNettyImpl extends NettySocketServer {
                     }
                 }
                 if(!positions.isEmpty()) {
-                    PlayerPositionUpdate update = new PlayerPositionUpdate();
+                    PlayerPositionUpdatePacket update = new PlayerPositionUpdatePacket();
                     update.positions = positions.toArray(LevelPlayerPosition[]::new);
                     VanillaPNX.get().getWrapper().getSocket().send(update);
                 }
             }, 10, 1);
-        } else if(packet instanceof LevelAcknowledged levelAcknowledged) {
+        } else if(packet instanceof LevelAcknowledgedPacket levelAcknowledged) {
             GenerationQueue.acknowledged(levelAcknowledged.levelName);
-        } else if(packet instanceof ChunkCompletion chunkCompletion) {
-            Level level = VanillaPNX.get().getServer().getLevelByName(chunkCompletion.levelName);
-            for(ChunkData data : chunkCompletion.chunks) {
+        } else if(packet instanceof ChunkTerrainDataPacket chunkTerrainDataPacket) {
+            Level level = VanillaPNX.get().getServer().getLevelByName(chunkTerrainDataPacket.levelName);
+            for(ChunkData data : chunkTerrainDataPacket.chunks) {
                 long chunkHash = data.chunkHash;
-                GenerationQueue.addToReceived(chunkCompletion.levelName, chunkHash);
+                GenerationQueue.addToReceived(chunkTerrainDataPacket.levelName, chunkHash);
                 VanillaGenerator.applyData(level.getChunk(Level.getHashX(chunkHash), Level.getHashZ(chunkHash)), data.blockData);
             }
+        } else if(packet instanceof PopulationPacket population) {
+            VanillaGenerator.applyEntity(population.levelName, population.entityData);
         }
     }
 }

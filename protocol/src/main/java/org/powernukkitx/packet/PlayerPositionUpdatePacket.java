@@ -3,7 +3,7 @@ package org.powernukkitx.packet;
 import org.powernukkitx.netty.HandleByteBuf;
 import org.powernukkitx.packet.objects.LevelPlayerPosition;
 
-public class PlayerPositionUpdate extends Packet {
+public class PlayerPositionUpdatePacket extends Packet {
 
     public LevelPlayerPosition[] positions;
 

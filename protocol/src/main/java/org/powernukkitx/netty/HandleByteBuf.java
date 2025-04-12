@@ -5,10 +5,7 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.util.ByteProcessor;
 import io.netty.util.internal.ObjectUtil;
 import io.netty.util.internal.StringUtil;
-import org.powernukkitx.packet.objects.BlockData;
-import org.powernukkitx.packet.objects.ChunkData;
-import org.powernukkitx.packet.objects.ChunkInfo;
-import org.powernukkitx.packet.objects.LevelPlayerPosition;
+import org.powernukkitx.packet.objects.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -973,6 +970,12 @@ public class HandleByteBuf extends ByteBuf {
 
     public LevelPlayerPosition readLevelPlayerPosition() {
         LevelPlayerPosition data = new LevelPlayerPosition();
+        data.decode(this);
+        return data;
+    }
+
+    public EntityData readEntityData() {
+        EntityData data = new EntityData();
         data.decode(this);
         return data;
     }

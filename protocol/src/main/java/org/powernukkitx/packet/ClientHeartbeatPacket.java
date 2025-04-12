@@ -1,6 +1,6 @@
 package org.powernukkitx.packet;
 
-public class ClientHeartbeat extends Packet {
+public class ClientHeartbeatPacket extends Packet {
 
     @Override
     public byte getPid() {

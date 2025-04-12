@@ -12,7 +12,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import lombok.Getter;
 import org.powernukkitx.VanillaPNX;
-import org.powernukkitx.packet.ChunkRequest;
+import org.powernukkitx.packet.ChunkRequestPacket;
 import org.powernukkitx.packet.objects.ChunkInfo;
 
 import java.util.ArrayList;
@@ -66,7 +66,7 @@ public class GenerationQueue {
             }
         }
         if(!chunks.isEmpty()) {
-            ChunkRequest request = new ChunkRequest();
+            ChunkRequestPacket request = new ChunkRequestPacket();
             request.levelName = level.getName();
             request.chunks = chunks.toArray(ChunkInfo[]::new);
             VanillaPNX.get().getWrapper().getSocket().send(request);

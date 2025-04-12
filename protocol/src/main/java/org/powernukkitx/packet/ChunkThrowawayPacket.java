@@ -2,7 +2,7 @@ package org.powernukkitx.packet;
 
 import org.powernukkitx.netty.HandleByteBuf;
 
-public class ChunkThrowaway extends Packet {
+public class ChunkThrowawayPacket extends Packet {
 
     public String levelName;
     public long chunkHash;

@@ -3,7 +3,7 @@ package org.powernukkitx.packet;
 import org.powernukkitx.netty.HandleByteBuf;
 import org.powernukkitx.packet.objects.ChunkInfo;
 
-public class ChunkRequest extends Packet {
+public class ChunkRequestPacket extends Packet {
 
     @Override
     public byte getPid() {

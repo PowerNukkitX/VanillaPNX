@@ -3,7 +3,10 @@ package org.powernukkitx.generator;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.*;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.EntityID;
 import cn.nukkit.level.DimensionData;
+import cn.nukkit.level.Position;
 import cn.nukkit.level.format.ChunkState;
 import cn.nukkit.level.format.IChunk;
 import cn.nukkit.level.generator.GenerateStage;
@@ -14,6 +17,7 @@ import cn.nukkit.registry.Registries;
 import lombok.Getter;
 import org.powernukkitx.packet.objects.BlockData;
 import org.powernukkitx.packet.objects.BlockVector;
+import org.powernukkitx.packet.objects.EntityData;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -73,6 +77,14 @@ public class VanillaGenerator extends Generator {
         }).start();
     }
 
+    public static void applyEntity(String levelName, EntityData[] entityData) {
+        for(EntityData data : entityData) {
+            Position position = new Position(data.x, data.y, data.z, Server.getInstance().getLevelByName(levelName));
+            Entity entity = Registries.ENTITY.provideEntity(getEntityName(data.entity.toLowerCase()), position.getChunk(), Entity.getDefaultNBT(position));
+            entity.spawnToAll();
+        }
+    }
+
     private static boolean shouldBeWaterlogged(String rawState) {
         if(rawState.contains("waterlogged=true")) return true;
         if(rawState.contains("seagrass")) return true;
@@ -80,4 +92,12 @@ public class VanillaGenerator extends Generator {
         if(rawState.contains("bubble_column")) return true;
         return false;
     }
+
+    private static String getEntityName(String id) {
+        return switch (id) {
+            case "villager" -> EntityID.VILLAGER_V2;
+            default -> "minecraft:" + id.replace(" ", "_");
+        };
+    }
+
 }

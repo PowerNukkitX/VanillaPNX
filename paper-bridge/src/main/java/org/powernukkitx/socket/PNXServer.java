@@ -6,7 +6,7 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.powernukkitx.PaperBridge;
 import org.powernukkitx.listener.ServerLoadListener;
-import org.powernukkitx.packet.LevelAcknowledged;
+import org.powernukkitx.packet.LevelAcknowledgedPacket;
 import org.powernukkitx.utils.WorldInfo;
 
 @Getter
@@ -23,7 +23,7 @@ public class PNXServer {
         Bukkit.getLogger().info("Registered new World: " + info.getName());
         worlds.put(info.getName(), info);
         if(ServerLoadListener.isLoaded()) info.getWorld();
-        LevelAcknowledged levelAcknowledged = new LevelAcknowledged();
+        LevelAcknowledgedPacket levelAcknowledged = new LevelAcknowledgedPacket();
         levelAcknowledged.levelName = info.getName();
         PaperBridge.get().getSocket().send(levelAcknowledged);
     }
