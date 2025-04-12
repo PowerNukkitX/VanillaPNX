@@ -15,10 +15,8 @@ public class ServerLoadListener implements Listener {
 
     @EventHandler
     public void onServerLoad(ServerLoadEvent event) {
-        for(PNXServer server : PaperBridge.get().getSocket().getServers().values()) {
-            for(WorldInfo info : server.getWorlds().values()) {
-                info.getWorld();
-            }
+        for(WorldInfo info : PaperBridge.get().getSocket().getServer().getWorlds().values()) {
+            info.getWorld();
         }
         loaded = true;
     }

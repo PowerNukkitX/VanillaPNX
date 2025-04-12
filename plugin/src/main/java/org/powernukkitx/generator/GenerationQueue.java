@@ -6,12 +6,16 @@ import cn.nukkit.level.Level;
 import cn.nukkit.level.format.ChunkState;
 import cn.nukkit.level.format.IChunk;
 import cn.nukkit.math.ChunkVector2;
-import com.google.gson.JsonArray;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import org.powernukkitx.VanillaPNX;
+import org.powernukkitx.packet.ChunkRequest;
+import org.powernukkitx.packet.objects.ChunkInfo;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GenerationQueue {
 
@@ -20,7 +24,11 @@ public class GenerationQueue {
     private static final Object2ObjectArrayMap<String, LongOpenHashSet> receivedLevelChunks = new Object2ObjectArrayMap<>();
     private static final Object2ObjectArrayMap<String, Long2LongOpenHashMap> requestedLevelChunks = new Object2ObjectArrayMap<>();
 
+    public static boolean initiated;
+
     public void init() {
+        if(initiated) return;
+        initiated = true;
         for(Level level : Server.getInstance().getLevels().values()) {
             if(VanillaGenerator.class.isAssignableFrom(level.getGenerator().getClass())) {
                 level.getScheduler().scheduleRepeatingTask(VanillaPNX.get(), () -> {
@@ -33,7 +41,7 @@ public class GenerationQueue {
     }
 
     private void tick(Level level) {
-        JsonArray chunks = new JsonArray();
+        List<ChunkInfo> chunks = new ArrayList<>();
         for(IChunk chunk : level.getChunks().values()) {
             if (chunk.getChunkState() != ChunkState.FINISHED) {
                 if (!requestedLevelChunks.containsKey(level.getName())) {
@@ -48,8 +56,8 @@ public class GenerationQueue {
                 long hash = Level.chunkHash(chunk.getX(), chunk.getZ());
                 if (!receivedChunks.contains(hash)) {
                     if (!requestedChunks.containsKey(hash)) {
-                        JsonArray array = new JsonArray();
-                        array.add(hash);
+                        ChunkInfo chunkInfo = new ChunkInfo();
+                        chunkInfo.chunkHash = hash;
                         long minDistance = Long.MAX_VALUE;
                         ChunkVector2 looking = new ChunkVector2(chunk.getX(), chunk.getZ());
                         for(Player player : level.getPlayers().values()) {
@@ -57,8 +65,8 @@ public class GenerationQueue {
                             long distance = (long) looking.distance(playerChunk);
                             if(distance < minDistance) minDistance = distance;
                         }
-                        array.add(minDistance);
-                        chunks.add(array);
+                        chunkInfo.priority = minDistance;
+                        chunks.add(chunkInfo);
                         requestedChunks.put(hash, System.currentTimeMillis());
                     } else if(System.currentTimeMillis() - requestedChunks.get(hash) > 10000) {
                         requestedChunks.remove(hash);
@@ -70,11 +78,10 @@ public class GenerationQueue {
             }
         }
         if(!chunks.isEmpty()) {
-            JsonArray array = new JsonArray();
-            array.add("RequestChunks");
-            array.add(level.getName());
-            array.add(chunks);
-            VanillaPNX.get().getWrapper().getSocket().send(array);
+            ChunkRequest request = new ChunkRequest();
+            request.levelName = level.getName();
+            request.chunks = chunks.toArray(ChunkInfo[]::new);
+            VanillaPNX.get().getWrapper().getSocket().send(request);
         }
     }
 

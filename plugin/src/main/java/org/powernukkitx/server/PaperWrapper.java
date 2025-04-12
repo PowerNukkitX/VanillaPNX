@@ -1,13 +1,12 @@
 package org.powernukkitx.server;
 
 import cn.nukkit.utils.Utils;
-import com.google.gson.JsonArray;
-import com.oracle.truffle.regex.tregex.nodes.dfa.Matchers;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.iq80.leveldb.fileenv.FileUtils;
+import org.powernukkitx.NettySocketServer;
 import org.powernukkitx.VanillaPNX;
-import org.powernukkitx.server.socket.PaperSocket;
+import org.powernukkitx.packet.ClientHello;
+import org.powernukkitx.server.socket.PNXNettyImpl;
 
 import java.io.*;
 import java.net.URL;
@@ -24,7 +23,7 @@ public class PaperWrapper {
     private Process process;
     private ProcessBuilder processBuilder;
 
-    private PaperSocket socket;
+    private PNXNettyImpl socket;
 
     private final File operationFolder;
 
@@ -39,7 +38,7 @@ public class PaperWrapper {
 
     public void start() {
         checkServerInstallation();
-        processBuilder = new ProcessBuilder("java", "-jar", jarName, "nogui").directory(operationFolder);
+        processBuilder = new ProcessBuilder("java", "-jar", jarName).directory(operationFolder);
 
         try {
             process = processBuilder.start();
@@ -57,8 +56,9 @@ public class PaperWrapper {
                         Pattern pattern = Pattern.compile("PNXSocketPortInfo=([0-9]*);");
                         Matcher matcher = pattern.matcher(line);
                         if(matcher.find()) {
-                            this.socket = new PaperSocket(Integer.parseInt(matcher.group(1)));
-                            this.socket.send("ClientHello");
+                            int port = VanillaPNX.get().getServer().getPort();
+                            this.socket = new PNXNettyImpl(port, Integer.parseInt(matcher.group(1)));
+                            this.socket.send(new ClientHello(port));
                         }
                     }
                 }
@@ -82,7 +82,6 @@ public class PaperWrapper {
     }
 
     public void stop() {
-        getSocket().send("ClientBye");
         writeConsole("stop");
     }
 

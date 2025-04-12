@@ -1,20 +1,20 @@
 package org.powernukkitx.utils;
 
-import com.google.gson.JsonArray;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
-import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.powernukkitx.PaperBridge;
+import org.powernukkitx.packet.ChunkCompletion;
+import org.powernukkitx.packet.objects.BlockData;
+import org.powernukkitx.packet.objects.BlockVector;
+import org.powernukkitx.packet.objects.ChunkData;
 import org.powernukkitx.socket.PNXServer;
-import org.powernukkitx.socket.PNXSocket;
 
 import java.util.Comparator;
 
@@ -56,9 +56,15 @@ public class WorldInfo {
                             reserve.add(hash);
                         }
                     }
+
+                    ObjectOpenHashSet<ChunkData> chunkData = new ObjectOpenHashSet<>();
                     for(long hash : reserve) {
-                        sentChunkFinished(hash);
+                        chunkData.add(getChunkData(hash));
                     }
+                    ChunkCompletion data = new ChunkCompletion();
+                    data.levelName = getName();
+                    data.chunks = chunkData.toArray(ChunkData[]::new);
+                    PaperBridge.get().getSocket().send(data);
                     Bukkit.getLogger().info("Sending " + reserve.size() + " Chunks took " + (System.currentTimeMillis() - startTime) + " ms");
                 });
                 thread.start();
@@ -67,39 +73,38 @@ public class WorldInfo {
         }
     }
 
-    private void sentChunkFinished(Long hash) {
+    private ChunkData getChunkData(Long hash) {
         int x = ChunkHash.getHashX(hash);
         int z = ChunkHash.getHashZ(hash);
 
         Chunk rChunk = getWorld().getChunkAt(x, z);
         ChunkSnapshot chunk = rChunk.getWorld().getChunkAt(x, z).getChunkSnapshot(false, true, false);
-        JsonArray terrain = new JsonArray();
+        ObjectOpenHashSet<BlockData> blocks = new ObjectOpenHashSet<>();
         int minHeight = getMinHeight(dimension);
         int maxHeight = getMaxHeight(dimension);
-        for(int _x = 0; _x < 16; _x++) {
-            for(int _z = 0; _z < 16; _z++) {
+        for(byte _x = 0; _x < 16; _x++) {
+            for(byte _z = 0; _z < 16; _z++) {
                 for(int _y = minHeight; _y <= maxHeight; _y++) {
                     String state = chunk.getBlockData(_x, _y, _z).getAsString();
-                    JsonArray data = new JsonArray();
-                    data.add(_x);
-                    data.add(_y);
-                    data.add(_z);
-                    data.add(state);
-                    data.add(chunk.getBiome(_x, _y, _z).getKey().getKey());
-                    terrain.add(data);
+                    BlockData blockData = new BlockData();
+                    BlockVector blockVector = new BlockVector();
+                    blockVector.x = _x;
+                    blockVector.y = _y;
+                    blockVector.z = _z;
+                    blockData.vector = blockVector;
+                    blockData.blockState = state;
+                    blockData.biome = chunk.getBiome(_x, _y, _z).getKey().getKey();
+                    blocks.add(blockData);
                 }
             }
         }
-        JsonArray tiles = new JsonArray();
 
-        JsonArray array = new JsonArray();
-        array.add("ChunkCompletion");
-        array.add(getName());
-        array.add(hash);
-        array.add(terrain);
-        array.add(tiles);
-        PNXSocket.send(server, array);
+        ChunkData data = new ChunkData();
+        data.chunkHash = hash;
+        data.blockData = blocks.toArray(BlockData[]::new);
+
         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(PaperBridge.get(), () -> rChunk.unload(false));
+        return data;
     }
 
     public World getWorld() {

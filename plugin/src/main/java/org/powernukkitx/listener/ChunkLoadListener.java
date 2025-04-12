@@ -22,7 +22,7 @@ public class ChunkLoadListener implements Listener {
         Level level = event.getLevel();
         if(VanillaGenerator.class.isAssignableFrom(level.getGenerator().getClass())) {
             while (!GenerationQueue.isAcknowledged(level.getName())) {
-                if(VanillaPNX.get().getWrapper().getSocket() != null && VanillaPNX.get().getWrapper().getSocket().isServerHello()) LevelLoadListener.sendLevelInfo(level);
+                if(VanillaPNX.get().getWrapper().getSocket() != null && GenerationQueue.initiated) LevelLoadListener.sendLevelInfo(level);
                 TimeUnit.MILLISECONDS.sleep(10);
             }
         }

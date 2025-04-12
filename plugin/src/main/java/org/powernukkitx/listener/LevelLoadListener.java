@@ -6,9 +6,10 @@ import cn.nukkit.event.level.LevelLoadEvent;
 import cn.nukkit.level.Level;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import lombok.Getter;
-import org.powernukkitx.generator.VanillaGenerator;
 import org.powernukkitx.VanillaPNX;
-import org.powernukkitx.server.socket.PaperSocket;
+import org.powernukkitx.generator.VanillaGenerator;
+import org.powernukkitx.packet.WorldInfo;
+import org.powernukkitx.server.socket.PNXNettyImpl;;
 
 public class LevelLoadListener implements Listener {
 
@@ -17,7 +18,7 @@ public class LevelLoadListener implements Listener {
 
     @EventHandler
     public void onLevelLoad(LevelLoadEvent event) {
-        PaperSocket socket = VanillaPNX.get().getWrapper().getSocket();
+        PNXNettyImpl socket = VanillaPNX.get().getWrapper().getSocket();
         if(socket != null) {
             Level level = event.getLevel();
             if(!sentLevels.contains(level.getName())) {
@@ -29,8 +30,12 @@ public class LevelLoadListener implements Listener {
     public static void sendLevelInfo(Level level) {
         if(VanillaGenerator.class.isAssignableFrom(level.getGenerator().getClass())) {
             if (!sentLevels.contains(level.getName())) {
-                PaperSocket socket = VanillaPNX.get().getWrapper().getSocket();
-                socket.send("WorldInfo", level.getName(), String.valueOf(level.getSeed()), String.valueOf(level.getDimension()));
+                PNXNettyImpl socket = VanillaPNX.get().getWrapper().getSocket();
+                WorldInfo info = new WorldInfo();
+                info.name = level.getName();
+                info.seed = level.getSeed();
+                info.dimension = level.getDimension();
+                socket.send(info);
                 sentLevels.add(level.getName());
             }
         }

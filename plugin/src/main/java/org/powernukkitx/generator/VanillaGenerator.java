@@ -11,9 +11,9 @@ import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.terra.mappings.JeBlockState;
 import cn.nukkit.level.generator.terra.mappings.MappingRegistries;
 import cn.nukkit.registry.Registries;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import lombok.Getter;
+import org.powernukkitx.packet.objects.BlockData;
+import org.powernukkitx.packet.objects.BlockVector;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,19 +43,19 @@ public class VanillaGenerator extends Generator {
         return NAME;
     }
 
-    public static void applyData(IChunk chunk, JsonArray terrain) {
+    public static void applyData(IChunk chunk, BlockData[] terrain) {
         new Thread(() -> {
 
             if(chunk.getChunkState() == ChunkState.FINISHED) return;
             chunk.setChunkState(ChunkState.FINISHED);
-            for(JsonElement element : terrain) {
-                JsonArray blockData = element.getAsJsonArray();
-                int x = blockData.get(0).getAsInt();
-                int y = blockData.get(1).getAsInt();
-                int z = blockData.get(2).getAsInt();
+            for(BlockData element : terrain) {
+                BlockVector vector = element.vector;
+                int x = vector.x;
+                int y = vector.y;
+                int z = vector.z;
 
-                String rawState = blockData.get(3).getAsString();
-                chunk.setBiomeId(x, y, z, BIOMES.getOrDefault("minecraft:" + blockData.get(4).getAsString(), 0));
+                String rawState = element.blockState;
+                chunk.setBiomeId(x, y, z, BIOMES.getOrDefault("minecraft:" + element.biome, 0));
                 if(shouldBeWaterlogged(rawState)) {
                     chunk.setBlockState(x, y, z, BlockWater.PROPERTIES.getDefaultState(), 1);
                 }
