@@ -7,6 +7,7 @@ import cn.nukkit.registry.Registries;
 import org.powernukkitx.generator.VanillaGenerateStage;
 import org.powernukkitx.generator.VanillaGenerator;
 import org.powernukkitx.listener.ChunkLoadListener;
+import org.powernukkitx.listener.ChunkUnloadListener;
 import org.powernukkitx.listener.LevelLoadListener;
 import org.powernukkitx.listener.PlayerLoginListener;
 import org.powernukkitx.server.PaperWrapper;
@@ -39,6 +40,7 @@ public class VanillaPNX extends PluginBase {
         pluginManager.registerEvents(new LevelLoadListener(), this);
         pluginManager.registerEvents(new ChunkLoadListener(), this);
         pluginManager.registerEvents(new PlayerLoginListener(), this);
+        pluginManager.registerEvents(new ChunkUnloadListener(), this);
     }
 
     @Override

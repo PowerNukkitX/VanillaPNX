@@ -30,7 +30,7 @@ public class WorldInfo {
     private final PNXServer server;
     private World world;
 
-    private final LongOpenHashSet chunkLoadingQueue = new LongOpenHashSet();
+    @Getter
     private final Long2LongOpenHashMap chunkQueue = new Long2LongOpenHashMap();
 
     private static final ObjectArraySet<Thread> chunkPacketThreads = new ObjectArraySet<>();
@@ -73,7 +73,7 @@ public class WorldInfo {
         }
     }
 
-    private ChunkData getChunkData(Long hash) {
+    public ChunkData getChunkData(Long hash) {
         int x = ChunkHash.getHashX(hash);
         int z = ChunkHash.getHashZ(hash);
 

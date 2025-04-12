@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
+import lombok.Getter;
 import org.powernukkitx.VanillaPNX;
 import org.powernukkitx.packet.ChunkRequest;
 import org.powernukkitx.packet.objects.ChunkInfo;
@@ -17,28 +18,15 @@ import org.powernukkitx.packet.objects.ChunkInfo;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class GenerationQueue {
 
     private static final ObjectArraySet<String> acknowledgedLevels = new ObjectArraySet<>();
 
     private static final Object2ObjectArrayMap<String, LongOpenHashSet> receivedLevelChunks = new Object2ObjectArrayMap<>();
+
+    @Getter
     private static final Object2ObjectArrayMap<String, Long2LongOpenHashMap> requestedLevelChunks = new Object2ObjectArrayMap<>();
-
-    public static boolean initiated;
-
-    public void init() {
-        if(initiated) return;
-        initiated = true;
-        for(Level level : Server.getInstance().getLevels().values()) {
-            if(VanillaGenerator.class.isAssignableFrom(level.getGenerator().getClass())) {
-                level.getScheduler().scheduleRepeatingTask(VanillaPNX.get(), () -> {
-                    if(isAcknowledged(level.getName())) {
-                        tick(level);
-                    }
-                },1);
-            }
-        }
-    }
 
     private void tick(Level level) {
         List<ChunkInfo> chunks = new ArrayList<>();
@@ -85,8 +73,14 @@ public class GenerationQueue {
         }
     }
 
-    public static void acknowledged(String level) {
-        acknowledgedLevels.add(level);
+    public static void acknowledged(String levelName) {
+        acknowledgedLevels.add(levelName);
+        Level level = Server.getInstance().getLevelByName(levelName);
+        level.getScheduler().scheduleRepeatingTask(VanillaPNX.get(), () -> {
+            if(isAcknowledged(level.getName())) {
+                VanillaGenerator.getQueue().tick(level);
+            }
+        },1);
     }
 
     public static void addToReceived(String level, Long chunkHash) {

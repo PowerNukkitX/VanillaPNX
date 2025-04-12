@@ -10,5 +10,7 @@ public class ProtocolInfo {
     public static final byte LEVEL_ACKNOWLEDGED = 5;
     public static final byte CHUNK_COMPLETION = 6;
     public static final byte CHUNK_REQUEST = 7;
+    public static final byte PLAYER_POSITION_UPDATE = 8;
+    public static final byte CHUNK_THROWAWAY = 9;
 
 }

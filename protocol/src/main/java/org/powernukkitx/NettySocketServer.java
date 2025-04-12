@@ -68,6 +68,8 @@ public abstract class NettySocketServer {
             case ProtocolInfo.LEVEL_ACKNOWLEDGED -> new LevelAcknowledged();
             case ProtocolInfo.CHUNK_COMPLETION -> new ChunkCompletion();
             case ProtocolInfo.CHUNK_REQUEST -> new ChunkRequest();
+            case ProtocolInfo.PLAYER_POSITION_UPDATE -> new PlayerPositionUpdate();
+            case ProtocolInfo.CHUNK_THROWAWAY -> new ChunkThrowaway();
             default -> new UnknownPacket(pid);
         };
         packet.decode(HandleByteBuf.of(byteBuf));
