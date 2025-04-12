@@ -18,6 +18,7 @@ import org.powernukkitx.socket.PNXServer;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 @ToString
@@ -31,20 +32,15 @@ public class WorldInfo {
     private final PNXServer server;
     private World world;
 
-    //This prevents read/write race
-    private final Long2LongOpenHashMap chunkQueueQueue = new Long2LongOpenHashMap();
-    @Getter
-    private final HashMap<Long, Long> chunkQueue = new HashMap<>(); //This one is accessed by too many threads.
+    private final ConcurrentHashMap<Long, Long> chunkQueue = new ConcurrentHashMap<>(); //This one is accessed by too many threads.
 
     private static final ObjectArraySet<Thread> chunkPacketThreads = new ObjectArraySet<>();
 
     public void queueChunk(long chunkHash, long priority) {
-        chunkQueueQueue.put(chunkHash, priority);
+        chunkQueue.put(chunkHash, priority);
     }
 
     public void tick() {
-        chunkQueue.putAll(chunkQueueQueue);
-        chunkQueueQueue.clear();
         chunkPacketThreads.removeIf(thread -> !thread.isAlive());
         if(!chunkQueue.isEmpty()) {
             if (chunkPacketThreads.size() < 32) {

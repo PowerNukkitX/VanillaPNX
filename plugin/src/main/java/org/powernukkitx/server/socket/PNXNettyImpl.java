@@ -2,10 +2,7 @@ package org.powernukkitx.server.socket;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
-import cn.nukkit.entity.Entity;
 import cn.nukkit.level.Level;
-import cn.nukkit.level.Position;
-import cn.nukkit.registry.Registries;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.powernukkitx.NettySocketServer;
@@ -14,9 +11,7 @@ import org.powernukkitx.generator.GenerationQueue;
 import org.powernukkitx.generator.VanillaGenerator;
 import org.powernukkitx.listener.LevelLoadListener;
 import org.powernukkitx.packet.*;
-import org.powernukkitx.packet.objects.ChunkData;
-import org.powernukkitx.packet.objects.EntityData;
-import org.powernukkitx.packet.objects.LevelPlayerPosition;
+import org.powernukkitx.packet.objects.*;
 
 public class PNXNettyImpl extends NettySocketServer {
 
@@ -58,10 +53,13 @@ public class PNXNettyImpl extends NettySocketServer {
             for(ChunkData data : chunkTerrainDataPacket.chunks) {
                 long chunkHash = data.chunkHash;
                 GenerationQueue.addToReceived(chunkTerrainDataPacket.levelName, chunkHash);
-                VanillaGenerator.applyData(level.getChunk(Level.getHashX(chunkHash), Level.getHashZ(chunkHash)), data.blockData);
+                VanillaGenerator.applyTerrain(level.getChunk(Level.getHashX(chunkHash), Level.getHashZ(chunkHash)), data.blockData);
             }
         } else if(packet instanceof PopulationPacket population) {
-            VanillaGenerator.applyEntity(population.levelName, population.entityData);
+            String levelName = population.levelName;
+            VanillaGenerator.applyEntity(levelName, population.entityData);
+        } else if(packet instanceof BlockEntityDataPacket blockEntityData) {
+            VanillaGenerator.applyBlockEntity(blockEntityData.levelName, blockEntityData.blockEntities);
         }
     }
 }

@@ -10,10 +10,10 @@ import org.bukkit.event.world.ChunkPopulateEvent;
 import org.powernukkitx.PaperBridge;
 import org.powernukkitx.packet.ChunkTerrainDataPacket;
 import org.powernukkitx.packet.PopulationPacket;
-import org.powernukkitx.packet.objects.ChunkData;
-import org.powernukkitx.packet.objects.EntityData;
+import org.powernukkitx.packet.objects.*;
 import org.powernukkitx.utils.ChunkHash;
 import org.powernukkitx.utils.WorldInfo;
+
 
 public class ChunkPopulateListener implements Listener {
     
@@ -37,15 +37,15 @@ public class ChunkPopulateListener implements Listener {
                 entityData.x = entity.getX();
                 entityData.y = entity.getY();
                 entityData.z = entity.getZ();
-                entityData.entity = entity.getName();
+                entityData.entity = entity.getType().getKey().getKey();
                 entities.add(entityData);
             }
-            if (!entities.isEmpty()) {
-                PopulationPacket packet = new PopulationPacket();
-                packet.levelName = world.getName();
-                packet.entityData = entities.toArray(EntityData[]::new);
-                PaperBridge.get().getSocket().send(packet);
-            }
+
+
+            PopulationPacket packet = new PopulationPacket();
+            packet.levelName = world.getName();
+            packet.entityData = entities.toArray(EntityData[]::new);
+            PaperBridge.get().getSocket().send(packet);
         }
 
     }

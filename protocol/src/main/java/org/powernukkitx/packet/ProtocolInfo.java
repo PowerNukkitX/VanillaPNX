@@ -13,5 +13,5 @@ public class ProtocolInfo {
     public static final byte PLAYER_POSITION_UPDATE = 8;
     public static final byte POPULATION = 9;
     public static final byte CLIENT_HEARTBEAT = 10;
-
+    public static final byte BLOCK_ENTITY_DATA = 11;
 }

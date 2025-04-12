@@ -4,6 +4,7 @@ import cn.nukkit.Server;
 import cn.nukkit.utils.Utils;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.powernukkitx.NettySocketServer;
 import org.powernukkitx.VanillaPNX;
 import org.powernukkitx.packet.ClientHelloPacket;
 import org.powernukkitx.server.socket.PNXNettyImpl;

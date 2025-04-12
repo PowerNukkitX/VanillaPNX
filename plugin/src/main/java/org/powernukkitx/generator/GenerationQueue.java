@@ -38,8 +38,8 @@ public class GenerationQueue {
                 if (!receivedLevelChunks.containsKey(level.getName())) {
                     receivedLevelChunks.put(level.getName(), new LongOpenHashSet());
                 }
-                LongOpenHashSet receivedChunks = receivedLevelChunks.get(level.getName());
-                Long2LongOpenHashMap requestedChunks = requestedLevelChunks.get(level.getName());
+                LongOpenHashSet receivedChunks = receivedLevelChunks.get(level.getName()).clone();
+                Long2LongOpenHashMap requestedChunks = requestedLevelChunks.get(level.getName()).clone();
 
                 long hash = Level.chunkHash(chunk.getX(), chunk.getZ());
                 if (!receivedChunks.contains(hash)) {

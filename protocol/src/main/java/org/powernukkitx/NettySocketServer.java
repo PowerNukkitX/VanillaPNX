@@ -74,7 +74,7 @@ public abstract class NettySocketServer {
             case ProtocolInfo.PLAYER_POSITION_UPDATE -> new PlayerPositionUpdatePacket();
             case ProtocolInfo.POPULATION -> new PopulationPacket();
             case ProtocolInfo.CLIENT_HEARTBEAT -> new ClientHeartbeatPacket();
-
+            case ProtocolInfo.BLOCK_ENTITY_DATA -> new BlockEntityDataPacket();
             default -> new UnknownPacket(pid);
         };
         packet.decode(HandleByteBuf.of(byteBuf));

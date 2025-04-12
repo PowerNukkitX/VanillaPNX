@@ -1,6 +1,7 @@
 package org.powernukkitx.packet;
 
 import org.powernukkitx.netty.HandleByteBuf;
+import org.powernukkitx.packet.objects.BlockEntityData;
 import org.powernukkitx.packet.objects.EntityData;
 
 public class PopulationPacket extends Packet {

@@ -19,7 +19,7 @@ public class LevelLoadListener implements Listener {
     @EventHandler
     public void onLevelLoad(LevelLoadEvent event) {
         PNXNettyImpl socket = VanillaPNX.get().getWrapper().getSocket();
-        if(socket != null) {
+        if(socket != null && socket.isAlive()) {
             Level level = event.getLevel();
             if(!sentLevels.contains(level.getName())) {
                 sendLevelInfo(level);

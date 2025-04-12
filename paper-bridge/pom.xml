@@ -78,7 +78,6 @@
       <groupId>org.powernukkitx</groupId>
       <artifactId>protocol</artifactId>
       <version>1.0-SNAPSHOT</version>
-      <scope>compile</scope>
     </dependency>
   </dependencies>
 </project>

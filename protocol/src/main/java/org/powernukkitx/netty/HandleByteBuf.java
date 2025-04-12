@@ -980,6 +980,24 @@ public class HandleByteBuf extends ByteBuf {
         return data;
     }
 
+    public BlockEntityData readBlockEntityData() {
+        BlockEntityData data = new BlockEntityData();
+        data.decode(this);
+        return data;
+    }
+
+    public EnchantmentData readEnchantmentData() {
+        EnchantmentData data = new EnchantmentData();
+        data.decode(this);
+        return data;
+    }
+
+    public ItemData readItemData() {
+        ItemData data = new ItemData();
+        data.decode(this);
+        return data;
+    }
+
     public <T> void readArray(Collection<T> array, Function<HandleByteBuf, T> function) {
         readArray(array, HandleByteBuf::readUnsignedVarInt, function);
     }

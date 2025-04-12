@@ -7,7 +7,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.powernukkitx.listener.ChunkPopulateListener;
 import org.powernukkitx.listener.ChunkUnloadListener;
 import org.powernukkitx.listener.ServerLoadListener;
-import org.powernukkitx.socket.PNXServer;
+import org.powernukkitx.packet.ServerHelloPacket;
 import org.powernukkitx.socket.PaperNettyImpl;
 import org.powernukkitx.utils.WorldInfo;
 
@@ -28,7 +28,6 @@ public final class PaperBridge extends JavaPlugin {
                 break;
             } catch (Exception e){}
         }
-
     }
 
     @Override
@@ -48,6 +47,7 @@ public final class PaperBridge extends JavaPlugin {
                 }
             }
         }.runTaskTimer(this, 0, 5);
+        socket.send(new ServerHelloPacket());
     }
 
     @Override
