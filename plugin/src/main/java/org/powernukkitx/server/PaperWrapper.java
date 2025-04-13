@@ -39,7 +39,7 @@ public class PaperWrapper {
 
     public void start() {
         checkServerInstallation();
-        processBuilder = new ProcessBuilder("java", "-jar", jarName).directory(operationFolder);
+        processBuilder = new ProcessBuilder("java", "-jar", jarName, "nogui").directory(operationFolder);
 
         try {
             process = processBuilder.start();

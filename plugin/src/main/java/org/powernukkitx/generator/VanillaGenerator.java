@@ -19,6 +19,7 @@ import cn.nukkit.level.generator.GenerateStage;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.terra.mappings.JeBlockState;
 import cn.nukkit.level.generator.terra.mappings.MappingRegistries;
+import cn.nukkit.registry.BiomeRegistry;
 import cn.nukkit.registry.Registries;
 import cn.nukkit.utils.Utils;
 import lombok.Getter;
@@ -64,7 +65,7 @@ public class VanillaGenerator extends Generator {
                 int z = vector.z;
 
                 String rawState = element.blockState;
-                chunk.setBiomeId(x, y, z, BIOMES.getOrDefault("minecraft:" + element.biome, 0));
+                chunk.setBiomeId(x, y, z, BIOMES.getOrDefault("minecraft:" + element.biome, chunk.getLevel().getDimension() == 2 ? BIOMES.get("minecraft:the_end") : 0));
                 if(shouldBeWaterlogged(rawState)) {
                     chunk.setBlockState(x, y, z, BlockWater.PROPERTIES.getDefaultState(), 1);
                 }
@@ -87,13 +88,16 @@ public class VanillaGenerator extends Generator {
                 chunk.getLevel().requestChunk(chunk.getX(), chunk.getZ(), player);
             }
             chunk.setChunkState(ChunkState.FINISHED);
+            if(VanillaPNX.get().getConfig().getBoolean("save-chunks")) chunk.getProvider().saveChunk(chunk.getX(), chunk.getZ(), chunk);
         }).start();
     }
 
     public static void applyEntity(String levelName, EntityData[] entityData) {
         for(EntityData data : entityData) {
             Position position = new Position(data.x, data.y, data.z, Server.getInstance().getLevelByName(levelName));
-            Entity entity = Registries.ENTITY.provideEntity(getEntityName(data.entity.toLowerCase()), position.getChunk(), Entity.getDefaultNBT(position));
+            String entityId = getEntityName(data.entity.toLowerCase());
+            if(entityId == null) return;
+            Entity entity = Registries.ENTITY.provideEntity(entityId, position.getChunk(), Entity.getDefaultNBT(position));
             if(entity != null) {
                 entity.spawnToAll();
             } else VanillaPNX.get().getLogger().error("Entity " + data.entity + " was not spawnable!");
@@ -153,6 +157,7 @@ public class VanillaGenerator extends Generator {
             case "zombified_piglin" -> EntityID.ZOMBIE_PIGMAN;
             case "evoker" -> EntityID.EVOCATION_ILLAGER;
             case "end_crystal" -> EntityID.ENDER_CRYSTAL;
+            case "item_frame" -> null;
             default -> "minecraft:" + id.replace(" ", "_");
         };
     }

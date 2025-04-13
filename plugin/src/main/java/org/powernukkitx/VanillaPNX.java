@@ -4,7 +4,8 @@ import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.registry.RegisterException;
 import cn.nukkit.registry.Registries;
-import org.powernukkitx.generator.EntityDamageListener;
+import cn.nukkit.utils.Config;
+import org.powernukkitx.listener.EntityDamageListener;
 import org.powernukkitx.generator.VanillaGenerateStage;
 import org.powernukkitx.generator.VanillaGenerator;
 import org.powernukkitx.listener.ChunkLoadListener;
@@ -14,6 +15,7 @@ import org.powernukkitx.listener.PlayerLoginListener;
 import org.powernukkitx.server.PaperWrapper;
 
 import java.io.File;
+import java.io.IOException;
 
 public class VanillaPNX extends PluginBase {
 
@@ -23,6 +25,7 @@ public class VanillaPNX extends PluginBase {
 
     @Override
     public void onLoad() {
+        saveDefaultConfig();
         instance = this;
         getDataFolder().mkdir();
         wrapper = new PaperWrapper(new File(getDataFolder(), "paper"));
@@ -56,5 +59,20 @@ public class VanillaPNX extends PluginBase {
 
     public PaperWrapper getWrapper() {
         return wrapper;
+    }
+
+    @Override
+    public void saveDefaultConfig() {
+        File file = new File(getDataFolder(), "config.yml");
+        if(!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        Config config = new Config(file);
+        if(!config.exists("save-chunks")) config.set("save-chunks", true);
+        config.save();
     }
 }

@@ -1,4 +1,4 @@
-package org.powernukkitx.generator;
+package org.powernukkitx.listener;
 
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;

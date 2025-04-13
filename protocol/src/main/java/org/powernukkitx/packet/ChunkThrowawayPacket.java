@@ -1,11 +1,11 @@
 package org.powernukkitx.packet;
 
 import org.powernukkitx.netty.HandleByteBuf;
+import org.powernukkitx.packet.objects.LevelPlayerPosition;
 
 public class ChunkThrowawayPacket extends Packet {
 
-    public String levelName;
-    public long chunkHash;
+    public LevelPlayerPosition[] positions;
 
     @Override
     public byte getPid() {
@@ -14,13 +14,13 @@ public class ChunkThrowawayPacket extends Packet {
 
     @Override
     public void encode(HandleByteBuf byteBuf) {
-        byteBuf.writeString(levelName);
-        byteBuf.writeLongLE(chunkHash);
+        byteBuf.writeArray(positions, positions -> {
+            positions.encode(byteBuf);
+        });
     }
 
     @Override
     public void decode(HandleByteBuf byteBuf) {
-        levelName = byteBuf.readString();
-        chunkHash = byteBuf.readLongLE();
+        positions = byteBuf.readArray(LevelPlayerPosition.class, HandleByteBuf::readLevelPlayerPosition);
     }
 }
