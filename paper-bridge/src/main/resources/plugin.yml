@@ -1,6 +1,6 @@
 name: paper-bridge
 version: '1.0-SNAPSHOT'
-main: org.powernukkitx.PaperBridge
+main: org.powernukkitx.vanillagen.PaperBridge
 api-version: '1.21'
 folia-supported: false
 load: STARTUP

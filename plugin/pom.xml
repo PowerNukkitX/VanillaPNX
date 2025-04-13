@@ -49,6 +49,7 @@
     </dependencies>
 
     <build>
+        <finalName>VanillaPNX</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
