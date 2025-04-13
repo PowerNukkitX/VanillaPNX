@@ -28,7 +28,7 @@ public class LevelLoadListener implements Listener {
     }
 
     public static void sendLevelInfo(Level level) {
-        if(VanillaGenerator.class.isAssignableFrom(level.getGenerator().getClass())) {
+        if(VanillaGenerator.class.isAssignableFrom(level.getGenerator().getClass()) && VanillaPNX.get().getWrapper().getSocket().isServerHello()) {
             if (!sentLevels.contains(level.getName())) {
                 PNXNettyImpl socket = VanillaPNX.get().getWrapper().getSocket();
                 WorldInfoPacket info = new WorldInfoPacket();

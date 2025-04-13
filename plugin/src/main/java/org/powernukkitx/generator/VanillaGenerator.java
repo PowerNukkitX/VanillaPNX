@@ -57,11 +57,6 @@ public class VanillaGenerator extends Generator {
     public static void applyTerrain(IChunk chunk, BlockData[] terrain) {
         new Thread(() -> {
             boolean blockEntity = false;
-            if(chunk.getChunkState() == ChunkState.FINISHED) {
-                VanillaPNX.get().getLogger().warning("Received finished chunk! (" + chunk.getX() + " " + chunk.getZ() + ")");
-                return;
-            }
-            chunk.setChunkState(ChunkState.FINISHED);
             for(BlockData element : terrain) {
                 BlockVector vector = element.vector;
                 int x = vector.x;
@@ -74,8 +69,8 @@ public class VanillaGenerator extends Generator {
                     chunk.setBlockState(x, y, z, BlockWater.PROPERTIES.getDefaultState(), 1);
                 }
                 BlockState state = MappingRegistries.BLOCKS.getPNXBlock(new JeBlockState(rawState));
-                if(state.toBlock() instanceof BlockEntityHolder<?>) blockEntity = true;
                 if(state == null) state = BlockUnknown.PROPERTIES.getDefaultState();
+                if(state.toBlock() instanceof BlockEntityHolder<?>) blockEntity = true;
                 chunk.setBlockState(x, y, z, state);
             }
             if(blockEntity) {
@@ -91,6 +86,7 @@ public class VanillaGenerator extends Generator {
             for(Player player : chunk.getLevel().getPlayers().values()) {
                 chunk.getLevel().requestChunk(chunk.getX(), chunk.getZ(), player);
             }
+            chunk.setChunkState(ChunkState.FINISHED);
         }).start();
     }
 
@@ -138,7 +134,7 @@ public class VanillaGenerator extends Generator {
                         Block block = level.getBlock(location);
                         level.setBlock(block, block);
                     }
-                } else System.out.println(data.state);
+                }
             }
         }
     }
@@ -156,6 +152,7 @@ public class VanillaGenerator extends Generator {
             case "villager" -> EntityID.VILLAGER_V2;
             case "zombified_piglin" -> EntityID.ZOMBIE_PIGMAN;
             case "evoker" -> EntityID.EVOCATION_ILLAGER;
+            case "end_crystal" -> EntityID.ENDER_CRYSTAL;
             default -> "minecraft:" + id.replace(" ", "_");
         };
     }

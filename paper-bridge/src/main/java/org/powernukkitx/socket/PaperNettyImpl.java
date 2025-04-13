@@ -70,7 +70,7 @@ public class PaperNettyImpl extends NettySocketServer {
                 }
             }
         } else if(packet instanceof ChunkThrowawayPacket throwaway) {
-            server.getWorlds().get(throwaway.levelName).getChunkQueue().remove(throwaway.chunkHash);
+           // server.getWorlds().get(throwaway.levelName).getChunkQueue().remove(throwaway.chunkHashes);
         } else if(packet instanceof BlockEntityDataPacket blockEntityData) {
             Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(PaperBridge.get(), () -> {
                 Chunk chunk = getServer().getWorlds().get(blockEntityData.levelName).getWorld().getChunkAt(ChunkHash.getHashX(blockEntityData.chunkHash), ChunkHash.getHashZ(blockEntityData.chunkHash));

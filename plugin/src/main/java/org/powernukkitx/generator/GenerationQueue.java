@@ -8,7 +8,6 @@ import cn.nukkit.level.format.IChunk;
 import cn.nukkit.math.ChunkVector2;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import lombok.Getter;
 import org.powernukkitx.VanillaPNX;
@@ -16,6 +15,7 @@ import org.powernukkitx.packet.ChunkRequestPacket;
 import org.powernukkitx.packet.objects.ChunkInfo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -23,10 +23,9 @@ public class GenerationQueue {
 
     private static final ObjectArraySet<String> acknowledgedLevels = new ObjectArraySet<>();
 
-    private static final Object2ObjectArrayMap<String, LongOpenHashSet> receivedLevelChunks = new Object2ObjectArrayMap<>();
-
     @Getter
-    private static final Object2ObjectArrayMap<String, Long2LongOpenHashMap> requestedLevelChunks = new Object2ObjectArrayMap<>();
+    private static final HashMap<String, Long2LongOpenHashMap> requestedLevelChunks = new HashMap<>();
+
 
     private void tick(Level level) {
         List<ChunkInfo> chunks = new ArrayList<>();
@@ -35,14 +34,9 @@ public class GenerationQueue {
                 if (!requestedLevelChunks.containsKey(level.getName())) {
                     requestedLevelChunks.put(level.getName(), new Long2LongOpenHashMap());
                 }
-                if (!receivedLevelChunks.containsKey(level.getName())) {
-                    receivedLevelChunks.put(level.getName(), new LongOpenHashSet());
-                }
-                LongOpenHashSet receivedChunks = receivedLevelChunks.get(level.getName()).clone();
-                Long2LongOpenHashMap requestedChunks = requestedLevelChunks.get(level.getName()).clone();
+                Long2LongOpenHashMap requestedChunks = requestedLevelChunks.get(level.getName());
 
                 long hash = Level.chunkHash(chunk.getX(), chunk.getZ());
-                if (!receivedChunks.contains(hash)) {
                     if (!requestedChunks.containsKey(hash)) {
                         ChunkInfo chunkInfo = new ChunkInfo();
                         chunkInfo.chunkHash = hash;
@@ -56,13 +50,10 @@ public class GenerationQueue {
                         chunkInfo.priority = minDistance;
                         chunks.add(chunkInfo);
                         requestedChunks.put(hash, System.currentTimeMillis());
-                    } else if(System.currentTimeMillis() - requestedChunks.get(hash) > 10000) {
+                    } else if(System.currentTimeMillis() - requestedChunks.get(hash) > 5000) {
                         requestedChunks.remove(hash);
                     }
-                } else {
-                    receivedChunks.remove(hash);
-                    requestedChunks.remove(hash);
-                }
+
             }
         }
         if(!chunks.isEmpty()) {
@@ -74,6 +65,7 @@ public class GenerationQueue {
     }
 
     public static void acknowledged(String levelName) {
+        if(isAcknowledged(levelName)) return;
         acknowledgedLevels.add(levelName);
         Level level = Server.getInstance().getLevelByName(levelName);
         level.getScheduler().scheduleRepeatingTask(VanillaPNX.get(), () -> {
@@ -84,10 +76,7 @@ public class GenerationQueue {
     }
 
     public static void addToReceived(String level, Long chunkHash) {
-        if (!receivedLevelChunks.containsKey(level)) {
-            receivedLevelChunks.put(level, new LongOpenHashSet());
-        }
-        receivedLevelChunks.get(level).add(chunkHash);
+
     }
 
     public static boolean isAcknowledged(String level) {

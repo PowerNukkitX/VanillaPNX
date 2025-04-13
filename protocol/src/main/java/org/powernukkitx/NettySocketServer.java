@@ -58,6 +58,7 @@ public abstract class NettySocketServer {
             }
         } catch (Exception e) {
             System.out.println("Connection to Paper Server timed out! If this spams your console, reboot the server!");
+            e.printStackTrace();
         }
     }
 

@@ -23,11 +23,13 @@ public class ChunkUnloadListener implements Listener {
                 long hash = Level.chunkHash(chunk.getX(), chunk.getZ());
                 Long2LongOpenHashMap chunks = GenerationQueue.getRequestedLevelChunks().get(level.getName());
                 if(chunks.containsKey(hash)) {
-                    chunks.remove(hash);
-                    ChunkThrowawayPacket throwaway = new ChunkThrowawayPacket();
-                    throwaway.levelName = level.getName();
-                    throwaway.chunkHash = hash;
-                    VanillaPNX.get().getWrapper().getSocket().send(throwaway);
+                    try {
+                        chunks.remove(hash);
+                        ChunkThrowawayPacket throwaway = new ChunkThrowawayPacket();
+                        throwaway.levelName = level.getName();
+                        throwaway.chunkHash = hash;
+                        VanillaPNX.get().getWrapper().getSocket().send(throwaway);
+                    } catch (Exception e) {}
                 }
             }
         }

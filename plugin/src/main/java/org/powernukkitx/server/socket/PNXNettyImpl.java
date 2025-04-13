@@ -5,6 +5,7 @@ import cn.nukkit.Server;
 import cn.nukkit.level.Level;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import lombok.Getter;
 import org.powernukkitx.NettySocketServer;
 import org.powernukkitx.VanillaPNX;
 import org.powernukkitx.generator.GenerationQueue;
@@ -19,9 +20,13 @@ public class PNXNettyImpl extends NettySocketServer {
         super(port, destinationPort);
     }
 
+    @Getter
+    private boolean serverHello = false;
+
     @Override
     protected void onPacket(Packet packet) {
         if(packet instanceof ServerHelloPacket) {
+            serverHello = true;
             VanillaPNX.get().getServer().getLevels().values().forEach(LevelLoadListener::sendLevelInfo);
             Server.getInstance().getScheduler().scheduleDelayedRepeatingTask(() -> {
                 send(new ClientHeartbeatPacket());
@@ -45,7 +50,7 @@ public class PNXNettyImpl extends NettySocketServer {
                     update.positions = positions.toArray(LevelPlayerPosition[]::new);
                     VanillaPNX.get().getWrapper().getSocket().send(update);
                 }
-            }, 10, 1);
+            }, 10, 5);
         } else if(packet instanceof LevelAcknowledgedPacket levelAcknowledged) {
             GenerationQueue.acknowledged(levelAcknowledged.levelName);
         } else if(packet instanceof ChunkTerrainDataPacket chunkTerrainDataPacket) {

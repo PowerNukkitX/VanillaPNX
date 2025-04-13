@@ -4,6 +4,7 @@ import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.registry.RegisterException;
 import cn.nukkit.registry.Registries;
+import org.powernukkitx.generator.EntityDamageListener;
 import org.powernukkitx.generator.VanillaGenerateStage;
 import org.powernukkitx.generator.VanillaGenerator;
 import org.powernukkitx.listener.ChunkLoadListener;
@@ -41,6 +42,7 @@ public class VanillaPNX extends PluginBase {
         pluginManager.registerEvents(new ChunkLoadListener(), this);
         pluginManager.registerEvents(new PlayerLoginListener(), this);
         pluginManager.registerEvents(new ChunkUnloadListener(), this);
+        pluginManager.registerEvents(new EntityDamageListener(), this);
     }
 
     @Override

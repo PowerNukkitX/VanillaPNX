@@ -45,7 +45,6 @@ public class WorldInfo {
         if(!chunkQueue.isEmpty()) {
             if (chunkPacketThreads.size() < 32) {
                 Thread thread = new Thread(() -> {
-                    long startTime = System.currentTimeMillis();
                     LongOpenHashSet reserve = new LongOpenHashSet();
                     long minPriority = -1;
                     for(var chunkHash : new Long2LongOpenHashMap(chunkQueue).long2LongEntrySet().stream().sorted(Comparator.comparingLong(Long2LongMap.Entry::getLongValue)).toArray()) {
@@ -66,7 +65,6 @@ public class WorldInfo {
                     data.levelName = getName();
                     data.chunks = chunkData.toArray(ChunkData[]::new);
                     PaperBridge.get().getSocket().send(data);
-                    Bukkit.getLogger().info("Sending " + reserve.size() + " Chunks took " + (System.currentTimeMillis() - startTime) + " ms");
                 });
                 thread.start();
                 chunkPacketThreads.add(thread);

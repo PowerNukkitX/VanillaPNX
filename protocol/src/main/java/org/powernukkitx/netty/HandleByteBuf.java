@@ -5,6 +5,8 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.util.ByteProcessor;
 import io.netty.util.internal.ObjectUtil;
 import io.netty.util.internal.StringUtil;
+import org.powernukkitx.NettySocketServer;
+import org.powernukkitx.packet.Packet;
 import org.powernukkitx.packet.objects.*;
 
 import java.io.IOException;
