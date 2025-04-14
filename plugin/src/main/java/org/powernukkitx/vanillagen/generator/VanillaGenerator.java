@@ -3,6 +3,9 @@ package org.powernukkitx.vanillagen.generator;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.*;
+import cn.nukkit.block.property.CommonBlockProperties;
+import cn.nukkit.blockentity.BlockEntity;
+import cn.nukkit.blockentity.BlockEntityItemFrame;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityID;
 import cn.nukkit.inventory.Inventory;
@@ -19,12 +22,16 @@ import cn.nukkit.level.generator.GenerateStage;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.terra.mappings.JeBlockState;
 import cn.nukkit.level.generator.terra.mappings.MappingRegistries;
+import cn.nukkit.math.BlockFace;
+import cn.nukkit.math.Vector3;
 import cn.nukkit.registry.Registries;
 import cn.nukkit.utils.Utils;
 import lombok.Getter;
 import org.powernukkitx.vanillagen.VanillaPNX;
 import org.powernukkitx.vanillagen.packet.BlockEntityDataPacket;
 import org.powernukkitx.vanillagen.packet.objects.*;
+import org.powernukkitx.vanillagen.packet.objects.entity.EntityExtra;
+import org.powernukkitx.vanillagen.packet.objects.entity.ItemFrameData;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -94,7 +101,20 @@ public class VanillaGenerator extends Generator {
     public static void applyEntity(String levelName, EntityData[] entityData) {
         for(EntityData data : entityData) {
             Position position = new Position(data.x, data.y, data.z, Server.getInstance().getLevelByName(levelName));
-            String entityId = getEntityName(data.entity.toLowerCase());
+            String entityId = getEntityName(data);
+            for (EntityExtra entityExtra : data.extras) {
+                if (entityExtra instanceof ItemFrameData itemFrameData) {
+                    position.getLevel().getScheduler().scheduleDelayedTask(() -> {
+                        BlockState state = BlockFrame.PROPERTIES.getBlockState(CommonBlockProperties.FACING_DIRECTION, BlockFace.valueOf(itemFrameData.face).ordinal());
+                        Level level = position.getLevel();
+                        level.setBlockStateAt(position.getFloorX(), position.getFloorY(), position.getFloorZ(), state);
+                        Block block = level.getBlock(position);
+                        BlockEntityItemFrame entity = ((BlockEntityHolder<BlockEntityItemFrame>) block).getOrCreateBlockEntity();
+                        entity.setItem(Item.get("minecraft:" + itemFrameData.item.toLowerCase()));
+                        entity.spawnToAll();
+                    }, 10);
+                }
+            }
             if(entityId == null) return;
             Entity entity = Registries.ENTITY.provideEntity(entityId, position.getChunk(), Entity.getDefaultNBT(position));
             if(entity != null) {
@@ -152,14 +172,14 @@ public class VanillaGenerator extends Generator {
         return false;
     }
 
-    private static String getEntityName(String id) {
-        return switch (id) {
+    private static String getEntityName(EntityData data) {
+        return switch (data.entity.toLowerCase()) {
             case "villager" -> EntityID.VILLAGER_V2;
             case "zombified_piglin" -> EntityID.ZOMBIE_PIGMAN;
             case "evoker" -> EntityID.EVOCATION_ILLAGER;
             case "end_crystal" -> EntityID.ENDER_CRYSTAL;
             case "item_frame" -> null;
-            default -> "minecraft:" + id.replace(" ", "_");
+            default -> "minecraft:" + data.entity.replace(" ", "_");
         };
     }
 
