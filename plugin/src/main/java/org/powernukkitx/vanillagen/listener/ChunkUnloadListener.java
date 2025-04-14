@@ -27,16 +27,18 @@ public class ChunkUnloadListener implements Listener {
         Level level = event.getLevel();
         if(VanillaGenerator.class.isAssignableFrom(level.getGenerator().getClass())) {
             if(GenerationQueue.getRequestedLevelChunks().containsKey(level.getName())) {
-                if (!unloadQueue.containsKey(level.getName())) {
-                    unloadQueue.put(level.getName(), new HashSet<>());
-                }
-                Set<Long> queuedChunks = unloadQueue.get(level.getName());
-                IChunk chunk = event.getChunk();
-                long hash = Level.chunkHash(chunk.getX(), chunk.getZ());
-                Long2LongOpenHashMap chunks = GenerationQueue.getRequestedLevelChunks().get(level.getName());
-                if(chunks.containsKey(hash)) {
-                    chunks.remove(hash);
-                    queuedChunks.add(hash);
+                if(GenerationQueue.isAcknowledged(level.getName())) {
+                    if (!unloadQueue.containsKey(level.getName())) {
+                        unloadQueue.put(level.getName(), new HashSet<>());
+                    }
+                    Set<Long> queuedChunks = unloadQueue.get(level.getName());
+                    IChunk chunk = event.getChunk();
+                    long hash = Level.chunkHash(chunk.getX(), chunk.getZ());
+                    Long2LongOpenHashMap chunks = GenerationQueue.getRequestedLevelChunks().get(level.getName());
+                    if(chunks.containsKey(hash)) {
+                        chunks.remove(hash);
+                        queuedChunks.add(hash);
+                    }
                 }
             }
         }
@@ -44,15 +46,18 @@ public class ChunkUnloadListener implements Listener {
 
     public ChunkUnloadListener() {
         Server.getInstance().getScheduler().scheduleRepeatingTask(VanillaPNX.get(), () -> {
-            Set<LevelPlayerPosition> positions = new HashSet<>();
-            for(String levelname : unloadQueue.keySet()) {
-                LevelPlayerPosition position = new LevelPlayerPosition();
-                position.levelName = levelname;
-                position.chunks = unloadQueue.get(levelname).toArray(Long[]::new);
+            if(VanillaPNX.get().getWrapper().getSocket().isServerHello()) {
+                Set<LevelPlayerPosition> positions = new HashSet<>();
+                for(String levelname : unloadQueue.keySet()) {
+                    LevelPlayerPosition position = new LevelPlayerPosition();
+                    position.levelName = levelname;
+                    position.chunks = unloadQueue.get(levelname).toArray(Long[]::new);
+                }
+                ChunkThrowawayPacket throwaway = new ChunkThrowawayPacket();
+                throwaway.positions = positions.toArray(LevelPlayerPosition[]::new);
+                VanillaPNX.get().getWrapper().getSocket().send(throwaway);
+                unloadQueue.clear();
             }
-            ChunkThrowawayPacket throwaway = new ChunkThrowawayPacket();
-            throwaway.positions = positions.toArray(LevelPlayerPosition[]::new);
-            VanillaPNX.get().getWrapper().getSocket().send(throwaway);
         }, 5);
     }
 

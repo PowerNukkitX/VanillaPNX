@@ -117,7 +117,9 @@ public class VanillaGenerator extends Generator {
                         item.setDamage(itemData.damage);
                         for(EnchantmentData enchantmentData : itemData.enchantments) {
                             try {
-                                Enchantment enchantment = Enchantment.getEnchantment(getEnchantmentId(enchantmentData.id));
+                                String enchantmentId = getEnchantmentId(enchantmentData.id);
+                                if(enchantmentId == null) continue;
+                                Enchantment enchantment = Enchantment.getEnchantment(enchantmentId);
                                 if (enchantment != null) {
                                     enchantment.setLevel(enchantmentData.level);
                                     item.addEnchantment(enchantment);
@@ -165,6 +167,7 @@ public class VanillaGenerator extends Generator {
         return switch (id) {
             case "binding_curse" -> Enchantment.NAME_BINDING_CURSE;
             case "vanishing_curse" -> Enchantment.NAME_VANISHING_CURSE;
+            case "sweeping_edge" -> null;
             default -> id;
         };
     }
