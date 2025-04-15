@@ -25,7 +25,6 @@ public class VanillaPNX extends PluginBase {
 
     @Override
     public void onLoad() {
-        saveDefaultConfig();
         instance = this;
         getDataFolder().mkdir();
         wrapper = new PaperWrapper(new File(getDataFolder(), "paper"));
