@@ -39,6 +39,7 @@ public class PaperNettyImpl extends NettySocketServer {
         if(packet instanceof ClientHelloPacket hello) {
             destinationPort = hello.port;
             server = new PNXServer(hello.port);
+            send(new ServerHelloPacket());
         } else if(packet instanceof ClientHeartbeatPacket) {
             heartbeatTime = System.currentTimeMillis();
         } else if(packet instanceof WorldInfoPacket info) {

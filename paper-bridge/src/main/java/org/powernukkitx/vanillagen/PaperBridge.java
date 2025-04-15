@@ -47,7 +47,7 @@ public final class PaperBridge extends JavaPlugin {
                 }
             }
         }.runTaskTimer(this, 0, 5);
-        socket.send(new ServerHelloPacket());
+
     }
 
     @Override

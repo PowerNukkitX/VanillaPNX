@@ -36,10 +36,16 @@ public abstract class NettySocketServer {
         alive = true;
         while (isAlive()) {
             Socket inputSocket = socket.accept();
-            BufferedInputStream bufferedStream = new BufferedInputStream(inputSocket.getInputStream());
-            ByteBuf byteBuf = Unpooled.wrappedBuffer(bufferedStream.readAllBytes());
-            Packet packet = decode(byteBuf);
-            new Thread(() -> onPacket(packet)).start();
+            new Thread(() -> {
+                try {
+                    BufferedInputStream bufferedStream = new BufferedInputStream(inputSocket.getInputStream());
+                    ByteBuf byteBuf = Unpooled.wrappedBuffer(bufferedStream.readAllBytes());
+                    Packet packet = decode(byteBuf);
+                    onPacket(packet);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }).start();
         }
     }
 
