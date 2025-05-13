@@ -128,7 +128,7 @@ public class PaperWrapper {
     protected boolean downloadPaper() {
         try {
             File file = new File(getOperationFolder(), jarName);
-            InputStream in = new URL("https://api.papermc.io/v2/projects/paper/versions/1.21.4/builds/224/downloads/paper-1.21.4-224.jar").openStream();
+            InputStream in = new URL("https://api.papermc.io/v2/projects/paper/versions/1.21.4/builds/230/downloads/paper-1.21.4-230.jar").openStream();
             Files.copy(in , file.toPath(), StandardCopyOption.REPLACE_EXISTING);
             VanillaPNX.get().getLogger().info("Successfully downloaded paper jar.");
             return true;
