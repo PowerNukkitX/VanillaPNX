@@ -58,7 +58,7 @@ public class PaperWrapper {
                         if(matcher.find()) {
                             int port = VanillaPNX.get().getServer().getPort();
                             this.socket = new PNXNettyImpl(port, Integer.parseInt(matcher.group(1)));
-                            this.socket.send(new ClientHelloPacket(port));
+                            this.socket.send(new ClientHelloPacket(port, ProcessHandle.current().pid()));
                         }
                     }
                 }

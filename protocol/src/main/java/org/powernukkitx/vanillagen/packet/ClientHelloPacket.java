@@ -9,6 +9,7 @@ import org.powernukkitx.vanillagen.netty.HandleByteBuf;
 public class ClientHelloPacket extends Packet {
 
     public int port;
+    public long processID;
 
     @Override
     public byte getPid() {
@@ -18,10 +19,12 @@ public class ClientHelloPacket extends Packet {
     @Override
     public void encode(HandleByteBuf byteBuf) {
         byteBuf.writeIntLE(port);
+        byteBuf.writeLongLE(processID);
     }
 
     @Override
     public void decode(HandleByteBuf byteBuf) {
         this.port = byteBuf.readIntLE();
+        this.processID = byteBuf.readLongLE();
     }
 }

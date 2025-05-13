@@ -11,6 +11,8 @@ import org.powernukkitx.vanillagen.packet.ServerHelloPacket;
 import org.powernukkitx.vanillagen.socket.PaperNettyImpl;
 import org.powernukkitx.vanillagen.utils.WorldInfo;
 
+import java.util.Optional;
+
 public final class PaperBridge extends JavaPlugin {
 
     private static PaperBridge instance;
@@ -39,8 +41,12 @@ public final class PaperBridge extends JavaPlugin {
             @Override
             public void run() {
                 if(System.currentTimeMillis() - PaperNettyImpl.getHeartbeatTime() > 5000) {
-                    Bukkit.getLogger().warning("Did not receive an heartbeat from PowerNukkitX in the last 5 seconds... Shutting down!");
-                    Bukkit.getServer().shutdown();
+                    Optional<ProcessHandle> parent = ProcessHandle.of(PaperNettyImpl.getPnxProcessId());
+                    if (!(parent.isPresent() && parent.get().isAlive())) {
+                        Bukkit.getLogger().warning("Did not receive an heartbeat from PowerNukkitX in the last 5 seconds... Shutting down!");
+                        Bukkit.getServer().shutdown();
+                        return;
+                    }
                 }
                 for(WorldInfo info : socket.getServer().getWorlds().values()) {
                     info.tick();

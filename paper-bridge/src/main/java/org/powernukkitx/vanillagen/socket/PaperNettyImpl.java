@@ -26,7 +26,9 @@ public class PaperNettyImpl extends NettySocketServer {
 
     @Getter
     private static Long heartbeatTime = System.currentTimeMillis();
-    
+    @Getter
+    private static Long pnxProcessId = -1L;
+
     @Getter
     protected PNXServer server;
 
@@ -38,6 +40,7 @@ public class PaperNettyImpl extends NettySocketServer {
     protected void onPacket(Packet packet) {
         if(packet instanceof ClientHelloPacket hello) {
             destinationPort = hello.port;
+            pnxProcessId = hello.processID;
             server = new PNXServer(hello.port);
             send(new ServerHelloPacket());
         } else if(packet instanceof ClientHeartbeatPacket) {
