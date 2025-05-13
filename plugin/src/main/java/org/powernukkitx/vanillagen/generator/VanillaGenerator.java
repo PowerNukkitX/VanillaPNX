@@ -8,6 +8,7 @@ import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntityItemFrame;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityID;
+import cn.nukkit.event.player.PlayerChunkRequestEvent;
 import cn.nukkit.inventory.Inventory;
 import cn.nukkit.inventory.InventoryHolder;
 import cn.nukkit.item.Item;
@@ -24,16 +25,20 @@ import cn.nukkit.level.generator.terra.mappings.JeBlockState;
 import cn.nukkit.level.generator.terra.mappings.MappingRegistries;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
+import cn.nukkit.network.protocol.LevelChunkPacket;
+import cn.nukkit.network.protocol.NetworkChunkPublisherUpdatePacket;
 import cn.nukkit.registry.Registries;
 import cn.nukkit.utils.Utils;
 import lombok.Getter;
 import org.powernukkitx.vanillagen.VanillaPNX;
+import org.powernukkitx.vanillagen.listener.ChunkSendManager;
 import org.powernukkitx.vanillagen.packet.BlockEntityDataPacket;
 import org.powernukkitx.vanillagen.packet.objects.*;
 import org.powernukkitx.vanillagen.packet.objects.entity.EntityExtra;
 import org.powernukkitx.vanillagen.packet.objects.entity.ItemFrameData;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class VanillaGenerator extends Generator {
@@ -76,7 +81,10 @@ public class VanillaGenerator extends Generator {
                     chunk.setBlockState(x, y, z, BlockWater.PROPERTIES.getDefaultState(), 1);
                 }
                 BlockState state = MappingRegistries.BLOCKS.getPNXBlock(new JeBlockState(rawState));
-                if(state == null) state = BlockUnknown.PROPERTIES.getDefaultState();
+                if(state == null) {
+                    Server.getInstance().getLogger().info("Received block from Paper Subserver which cannot be parsed: " + rawState);
+                    state = BlockUnknown.PROPERTIES.getDefaultState();
+                }
                 if(state.toBlock() instanceof BlockEntityHolder<?>) blockEntity = true;
                 chunk.setBlockState(x, y, z, state);
             }
@@ -95,6 +103,8 @@ public class VanillaGenerator extends Generator {
             }
             chunk.setChunkState(ChunkState.FINISHED);
             if(VanillaPNX.get().getConfig().getBoolean("save-chunks")) chunk.getProvider().saveChunk(chunk.getX(), chunk.getZ(), chunk);
+            ChunkSendManager.sendChunk(chunk);
+
         }).start();
     }
 
