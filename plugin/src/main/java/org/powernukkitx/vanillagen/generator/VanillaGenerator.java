@@ -139,37 +139,39 @@ public class VanillaGenerator extends Generator {
             BlockVector vector = data.vector;
             Location location = new Location(vector.x, vector.y, vector.z, level);
             if(level.getBlock(location) instanceof BlockEntityHolder<?> holder) {
-                if(holder.getOrCreateBlockEntity() instanceof InventoryHolder inventoryHolder) {
-                    for(ItemData itemData : data.items) {
-                        Item item = Item.get("minecraft:" + itemData.id);
-                        if(item.isNull()) continue;
-                        item.setCount(itemData.count);
-                        item.setDamage(itemData.damage);
-                        for(EnchantmentData enchantmentData : itemData.enchantments) {
-                            try {
-                                String enchantmentId = getEnchantmentId(enchantmentData.id);
-                                if(enchantmentId == null) continue;
-                                Enchantment enchantment = Enchantment.getEnchantment(enchantmentId);
-                                if (enchantment != null) {
-                                    enchantment.setLevel(enchantmentData.level);
-                                    item.addEnchantment(enchantment);
-                                } else VanillaPNX.get().getLogger().error("Enchantment " + enchantmentData.id + " does not exist.");
-                            } catch (Exception e) {
-                                VanillaPNX.get().getLogger().error("Enchantment " + enchantmentData.id + " does not exist.");
+                try {
+                    if(holder.getOrCreateBlockEntity() instanceof InventoryHolder inventoryHolder) {
+                        for(ItemData itemData : data.items) {
+                            Item item = Item.get("minecraft:" + itemData.id);
+                            if(item.isNull()) continue;
+                            item.setCount(itemData.count);
+                            item.setDamage(itemData.damage);
+                            for(EnchantmentData enchantmentData : itemData.enchantments) {
+                                try {
+                                    String enchantmentId = getEnchantmentId(enchantmentData.id);
+                                    if(enchantmentId == null) continue;
+                                    Enchantment enchantment = Enchantment.getEnchantment(enchantmentId);
+                                    if (enchantment != null) {
+                                        enchantment.setLevel(enchantmentData.level);
+                                        item.addEnchantment(enchantment);
+                                    } else VanillaPNX.get().getLogger().error("Enchantment " + enchantmentData.id + " does not exist.");
+                                } catch (Exception e) {
+                                    VanillaPNX.get().getLogger().error("Enchantment " + enchantmentData.id + " does not exist.");
+                                }
                             }
-                        }
-                        Inventory inventory = inventoryHolder.getInventory();
-                        while(true) {
-                            int randomSlot = Utils.rand(0, inventory.getSize());
-                            if(inventory.getItem(randomSlot).isNull()) {
-                                inventory.setItem(randomSlot, item);
-                                break;
+                            Inventory inventory = inventoryHolder.getInventory();
+                            while(true) {
+                                int randomSlot = Utils.rand(0, inventory.getSize());
+                                if(inventory.getItem(randomSlot).isNull()) {
+                                    inventory.setItem(randomSlot, item);
+                                    break;
+                                }
                             }
+                            Block block = level.getBlock(location);
+                            level.setBlock(block, block);
                         }
-                        Block block = level.getBlock(location);
-                        level.setBlock(block, block);
                     }
-                }
+                } catch (Exception ignore) {}
             }
         }
     }
