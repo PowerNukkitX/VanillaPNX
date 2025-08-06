@@ -26,15 +26,6 @@ public class ChunkPopulateListener implements Listener {
         World world = event.getWorld();
         Chunk chunk = event.getChunk();
         if(PaperBridge.get().getSocket().getServer().getWorlds().containsKey(world.getName())) {
-            new Thread(() -> {
-                if (!PaperBridge.get().getSocket().getServer().getWorlds().get(world.getName()).getChunkQueue().containsKey(ChunkHash.chunkHash(chunk.getX(), chunk.getZ()))) {
-                    ChunkTerrainDataPacket data = new ChunkTerrainDataPacket();
-                    data.levelName = world.getName();
-                    WorldInfo info = PaperBridge.get().getSocket().getServer().getWorlds().get(world.getName());
-                    data.chunks = new ChunkData[]{info.getChunkData(ChunkHash.chunkHash(chunk.getX(), chunk.getZ()))};
-                    PaperBridge.get().getSocket().send(data);
-                }
-            }).start();
             ObjectOpenHashSet<EntityData> entities = new ObjectOpenHashSet<>();
             for (Entity entity : chunk.getEntities()) {
                 EntityData entityData = new EntityData();

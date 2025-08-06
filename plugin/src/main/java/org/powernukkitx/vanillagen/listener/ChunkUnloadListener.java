@@ -17,6 +17,7 @@ import org.powernukkitx.vanillagen.packet.objects.LevelPlayerPosition;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkUnloadListener implements Listener {
 
@@ -34,7 +35,7 @@ public class ChunkUnloadListener implements Listener {
                     Set<Long> queuedChunks = unloadQueue.get(level.getName());
                     IChunk chunk = event.getChunk();
                     long hash = Level.chunkHash(chunk.getX(), chunk.getZ());
-                    Long2LongOpenHashMap chunks = GenerationQueue.getRequestedLevelChunks().get(level.getName());
+                    ConcurrentHashMap<Long, Long> chunks = GenerationQueue.getRequestedLevelChunks().get(level.getName());
                     if(chunks.containsKey(hash)) {
                         chunks.remove(hash);
                         queuedChunks.add(hash);
@@ -55,6 +56,7 @@ public class ChunkUnloadListener implements Listener {
                 }
                 ChunkThrowawayPacket throwaway = new ChunkThrowawayPacket();
                 throwaway.positions = positions.toArray(LevelPlayerPosition[]::new);
+
                 VanillaPNX.get().getWrapper().getSocket().send(throwaway);
                 unloadQueue.clear();
             }

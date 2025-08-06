@@ -101,6 +101,7 @@ public class VanillaGenerator extends Generator {
             chunk.setChunkState(ChunkState.FINISHED);
             if(VanillaPNX.get().getConfig().getBoolean("save-chunks")) chunk.getProvider().saveChunk(chunk.getX(), chunk.getZ(), chunk);
             ChunkSendManager.sendChunk(chunk);
+            GenerationQueue.addToReceived(chunk.getLevel().getName(), Level.chunkHash(chunk.getX(), chunk.getZ()));
 
         }).start();
     }

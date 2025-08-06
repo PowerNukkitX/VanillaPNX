@@ -17,6 +17,7 @@ import org.powernukkitx.vanillagen.packet.objects.ChunkData;
 import org.powernukkitx.vanillagen.socket.PNXServer;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
@@ -46,7 +47,7 @@ public class WorldInfo {
                 Thread thread = new Thread(() -> {
                     LongOpenHashSet reserve = new LongOpenHashSet();
                     long minPriority = -1;
-                    for(var chunkHash : new Long2LongOpenHashMap(chunkQueue).long2LongEntrySet().stream().sorted(Comparator.comparingLong(Long2LongMap.Entry::getLongValue)).toArray()) {
+                    for(var chunkHash : new Long2LongOpenHashMap(new HashMap<>(chunkQueue)).long2LongEntrySet().stream().sorted(Comparator.comparingLong(Long2LongMap.Entry::getLongValue)).toArray()) {
                         var entry = ((Long2LongMap.Entry) chunkHash);
                         if(minPriority == -1) minPriority = entry.getLongValue();
                         if(reserve.size() < (minPriority < 2 ? 4 : 2)) {

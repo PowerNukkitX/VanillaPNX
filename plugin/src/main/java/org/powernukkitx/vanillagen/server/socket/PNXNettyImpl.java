@@ -58,7 +58,6 @@ public class PNXNettyImpl extends NettySocketServer {
             Level level = VanillaPNX.get().getServer().getLevelByName(chunkTerrainDataPacket.levelName);
             for(ChunkData data : chunkTerrainDataPacket.chunks) {
                 long chunkHash = data.chunkHash;
-                GenerationQueue.addToReceived(chunkTerrainDataPacket.levelName, chunkHash);
                 VanillaGenerator.applyTerrain(level.getChunk(Level.getHashX(chunkHash), Level.getHashZ(chunkHash)), data.blockData);
             }
         } else if(packet instanceof PopulationPacket population) {
