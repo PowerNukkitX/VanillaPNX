@@ -10,6 +10,9 @@ This plugin was heavily optimized, but good hardware is still a must have for th
 
 This plugin is also still in beta. Not everything works yet.
 
+⚠️ This plugin might not work for some minecraft server hosters. We recommend self hosting or getting a vps/dedicated.
+If the machine you are using this plugin is already running a java edition server, you have to change the port of the plugins paper server in /plugins/VanillaPNX/paper/server.properties to an unused port (and one above)
+
 - config.json to use
 
 ```json
